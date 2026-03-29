@@ -6,6 +6,7 @@ export const authConfig = {
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
+      console.log("authorized called", auth);
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       console.log('pathname: ', nextUrl.pathname)
@@ -20,6 +21,13 @@ export const authConfig = {
       }
       return false;
     },
+    signIn({ account, profile }) {
+      console.log("signIn called");
+      return true;
+    },
+    async redirect({ url, baseUrl }) {
+      return '/dashboard';
+    }
   },
   providers: [], // Add providers with an empty array for now
 } satisfies NextAuthConfig;

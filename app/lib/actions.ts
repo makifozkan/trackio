@@ -141,3 +141,42 @@ export async function authenticate(
         throw error;
     }
 }
+
+
+export async function googleSignin(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        await signIn('google', formData);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return 'Invalid credentials.';
+                default:
+                    return 'Something went wrong.';
+            }
+        }
+        throw error;
+    }
+}
+
+export async function appleSignin(
+    prevState: string | undefined,
+    formData: FormData,
+) {
+    try {
+        await signIn('apple', formData);
+    } catch (error) {
+        if (error instanceof AuthError) {
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return 'Invalid credentials.';
+                default:
+                    return 'Something went wrong.';
+            }
+        }
+        throw error;
+    }
+}

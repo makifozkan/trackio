@@ -5,7 +5,8 @@ import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import postgres from 'postgres';
-
+import GoogleProvider from "next-auth/providers/google";
+import Apple from 'next-auth/providers/apple';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -20,11 +21,12 @@ async function getUser(email: string): Promise<User | undefined> {
 }
 
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
     providers: [
         Credentials({
             async authorize(credentials) {
+                console.log("authorize called");
                 const parsedCredentials = z
                     .object({ email: z.string().email(), password: z.string().min(6) })
                     .safeParse(credentials);
@@ -36,7 +38,6 @@ export const { auth, signIn, signOut } = NextAuth({
 
                     const passwordsMatch = await bcrypt.compare(password, user.password);
                     if (passwordsMatch) return user;
-
                 }
 
 
@@ -44,5 +45,19 @@ export const { auth, signIn, signOut } = NextAuth({
                 return null;
             },
         }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            authorization: {
+                params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code"
+                }
+            }
+        }),
+        Apple({
+
+        })
     ],
 });

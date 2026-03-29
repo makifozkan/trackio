@@ -2,10 +2,13 @@ import Link from 'next/link';
 import NavLinks from '@/app/ui/dashboard/nav-links';
 import AcmeLogo from '@/app/ui/acme-logo';
 import { PowerIcon } from '@heroicons/react/24/outline';
-import { signOut } from '@/auth';
+import { signOut, auth } from '@/auth';
 
 
-export default function SideNav() {
+export default async function SideNav() {
+  const session = await auth();
+  console.log('session', session);
+
   return (
     <div className="flex h-screen flex-col justify-between border-e border-gray-100 bg-white">
       <div className="px-4 py-6">
@@ -16,12 +19,9 @@ export default function SideNav() {
         </svg>
 
         <ul className="mt-6 space-y-1">
-          <li>
-            <a href="#" className="block rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
-              General
-            </a>
-          </li>
 
+
+          <NavLinks />
           <li>
             <details className="group [&amp;_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
@@ -49,19 +49,6 @@ export default function SideNav() {
               </ul>
             </details>
           </li>
-          <NavLinks />
-          <li>
-            <a href="#" className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-              Billing
-            </a>
-          </li>
-
-          <li>
-            <a href="#" className="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-              Invoices
-            </a>
-          </li>
-
           <li>
             <details className="group [&amp;_summary::-webkit-details-marker]:hidden">
               <summary className="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
@@ -108,9 +95,9 @@ export default function SideNav() {
 
           <div>
             <p className="text-xs">
-              <strong className="block font-medium">Eric Frusciante</strong>
+              <strong className="block font-medium">{session?.user?.name}</strong>
 
-              <span> eric@frusciante.com </span>
+              <span> {session?.user?.email}</span>
             </p>
           </div>
         </a>
