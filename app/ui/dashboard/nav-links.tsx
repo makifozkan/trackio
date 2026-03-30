@@ -22,6 +22,8 @@ const links = [
   },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },
   { name: 'Ideas', href: '/dashboard/ideas', icon: UserGroupIcon },
+  { name: 'Explorer', href: '/dashboard/explorer', icon: UserGroupIcon },
+  { name: 'Taskmaster', href: '/dashboard/taskmaster', icon: UserGroupIcon },
   { name: 'Projects', href: '/dashboard/projects', icon: UserGroupIcon },
   { name: 'Launchpad', href: '/dashboard/launchpad', icon: UserGroupIcon }
 ];
