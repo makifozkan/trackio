@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/nextjs-vite';
+import path from 'path';
 
 const config: StorybookConfig = {
   "stories": [
@@ -15,6 +16,15 @@ const config: StorybookConfig = {
   "framework": "@storybook/nextjs-vite",
   "staticDirs": [
     "..\\public"
-  ]
+  ],
+  viteFinal: async (config) => {
+    if (config.resolve) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@/app/lib/ideas-actions': path.resolve(process.cwd(), 'stories/mocks/ideas-actions.ts'),
+      };
+    }
+    return config;
+  },
 };
 export default config;

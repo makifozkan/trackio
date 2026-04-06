@@ -44,8 +44,8 @@ async function IdeasList() {
 
 export default function Page() {
   return (
-    <main className="bg-[#f7f9fb] min-h-screen">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <main className="min-h-screen">
+      <div className="mx-auto">
         <IdeasHeader />
         
         <Suspense fallback={<IdeaCardsSkeleton />}>
