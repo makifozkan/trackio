@@ -107,7 +107,12 @@ export default function Navigation({ user, signOutAction }: NavProps) {
           <div className="mt-auto pt-8 border-t border-gray-200/50">
             <div className="flex items-center gap-3 px-2 mb-6">
               {user?.image ? (
-                <img src={user.image} alt={user.name || ''} className="h-10 w-10 rounded-full object-cover shadow-sm border border-white" />
+                <img 
+                  src={user.image} 
+                  alt={user.name || 'User profile'} 
+                  className="h-10 w-10 rounded-full object-cover shadow-sm border border-white" 
+                  referrerPolicy="no-referrer"
+                />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 border border-white">
                   <UserCircleIcon className="h-6 w-6" />
