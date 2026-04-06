@@ -13,7 +13,7 @@ export function Button({ children, className, ...rest }: ButtonProps) {
         </svg>
       </span>
 
-      <span className="text-sm font-medium transition-all group-hover:ms-4">       {children} </span>
+      <span className="text-sm font-medium transition-all group-hover:ms-4">{children}</span>
     </button>
   );
 }

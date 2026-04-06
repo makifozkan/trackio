@@ -34,6 +34,8 @@ export type State = {
     message?: string | null;
 };
 
+// create a method that does basic arithmetic operations
+
 
 export async function createInvoice(prevState: State, formData: FormData) {
     const validatedFields = CreateInvoice.safeParse({
