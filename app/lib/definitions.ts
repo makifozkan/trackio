@@ -86,3 +86,15 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
+
+
+export type Idea = {
+  id: string;
+  title: string;
+  description: string;
+  categories: string[]; // Fixed to plural
+  keywords: string[];
+  status: 'High Potential' | 'Active Test' | 'Paused' | 'High Alpha' | 'Draft';
+  is_ai_generated: boolean;
+  created_at: string;
+};

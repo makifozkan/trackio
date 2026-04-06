@@ -82,6 +82,49 @@ export function LatestInvoicesSkeleton() {
   );
 }
 
+export function IdeaCardSkeleton() {
+  return (
+    <div className={`${shimmer} relative flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm p-6`}>
+      <div className="flex items-center justify-between">
+        <div className="h-5 w-24 rounded-full bg-gray-100" />
+        <div className="h-5 w-5 rounded-full bg-gray-100" />
+      </div>
+
+      <div className="mt-6 flex-1">
+        <div className="h-7 w-3/4 rounded-md bg-gray-100" />
+        <div className="mt-4 space-y-2">
+          <div className="h-4 w-full rounded-md bg-gray-100" />
+          <div className="h-4 w-full rounded-md bg-gray-100" />
+          <div className="h-4 w-2/3 rounded-md bg-gray-100" />
+        </div>
+      </div>
+
+      <div className="mt-8 flex gap-2">
+        <div className="h-6 w-12 rounded-md bg-gray-100" />
+        <div className="h-6 w-16 rounded-md bg-gray-100" />
+        <div className="h-6 w-14 rounded-md bg-gray-100" />
+      </div>
+
+      <div className="mt-6 flex items-center justify-between border-t border-gray-50 pt-4">
+        <div className="h-4 w-28 rounded-md bg-gray-100" />
+      </div>
+    </div>
+  );
+}
+
+export function IdeaCardsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      <IdeaCardSkeleton />
+      <IdeaCardSkeleton />
+      <IdeaCardSkeleton />
+      <IdeaCardSkeleton />
+      <IdeaCardSkeleton />
+      <IdeaCardSkeleton />
+    </div>
+  );
+}
+
 export default function DashboardSkeleton() {
   return (
     <>

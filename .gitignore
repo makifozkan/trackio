@@ -38,3 +38,5 @@ next-env.d.ts
 
 # intellij
 .idea
+*storybook.log
+storybook-static

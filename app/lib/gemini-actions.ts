@@ -50,3 +50,11 @@ export async function generateIdeas(keywords: string[]) {
 
     return [];
 }
+
+export async function chatWithGemini(messages: { role: "user" | "assistant"; content: string }[]) {
+    const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: messages.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n"),
+    });
+    return response?.text;
+}

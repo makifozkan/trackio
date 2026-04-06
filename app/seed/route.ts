@@ -101,6 +101,22 @@ async function seedRevenue() {
   return insertedRevenue;
 }
 
+async function seedIdeas() { 
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS ideas (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
+      categories VARCHAR(100)[] NOT NULL,
+      keywords VARCHAR(100)[] NOT NULL,
+      status VARCHAR(50) DEFAULT 'Draft',
+      is_ai_generated BOOLEAN NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+}
+
 export async function GET() {
   try {
     const result = await sql.begin((sql) => [
@@ -108,6 +124,7 @@ export async function GET() {
       seedCustomers(),
       seedInvoices(),
       seedRevenue(),
+      seedIdeas(),
     ]);
 
     return Response.json({ message: 'Database seeded successfully' });
