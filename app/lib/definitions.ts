@@ -111,10 +111,12 @@ export type Project = {
   end_date: string;
   team_members?: User[];
   tasks?: Partial<Task>[];
+  created_at: string;
 };
 
 export type Task = {
   id: string;
+  order: number; // New field to track the order of tasks
   name: string;
   category: string;
   duration: number; // Duration in days
@@ -130,4 +132,5 @@ export type Task = {
   priority: 'Low' | 'Medium' | 'High';
   sub_tasks?: Partial<Task>[];
   is_expanded?: boolean; // For UI state management
+  created_at: string;
 };

@@ -20,7 +20,7 @@ const IdeaSchema = z.object({
 
 const CreateIdea = IdeaSchema.omit({ id: true, created_at: true });
 
-export type State = {
+type State = {
     errors?: {
         title?: string[];
         description?: string[];

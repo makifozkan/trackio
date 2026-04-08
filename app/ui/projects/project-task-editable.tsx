@@ -11,7 +11,7 @@ export default function ProjectTaskEditable({ task, cancelCallback, saveCallback
         <div className="flex items-center gap-4 group">
             <div className="flex-1 bg-white border-2 border-sky-500/30 rounded-xl p-4 shadow-sm flex flex-col gap-4">
                 <div className="flex items-center gap-4">
-                    <button className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-400">
+                    <button type="button" className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-400">
                         <ExpandMore className="text-slate-400 text-sm" />
                     </button>
                     <div className="flex-1 flex gap-3">
@@ -38,9 +38,9 @@ export default function ProjectTaskEditable({ task, cancelCallback, saveCallback
                         <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">layers</span> {task?.sub_tasks?.length || 0} Sub-tasks</span>
                     </div>
                     <div className="flex items-center gap-1">
-                        <button onClick={() => cancelCallback && cancelCallback()} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-sky-600 rounded-lg" title="Cancel"><Cancel className="material-symbols-outlined text-lg" /></button>
-                        <button onClick={() => saveCallback && saveCallback({ id: task?.id, name, category, duration })} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-sky-600 rounded-lg" title="Save Row"><CheckCircle className="material-symbols-outlined text-lg" /></button>
-                        <button onClick={() => deleteCallback && deleteCallback(task?.id || "")} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-red-500 rounded-lg" title="Delete"><Delete className="material-symbols-outlined text-lg" /></button>
+                        <button type="button" onClick={() => cancelCallback && cancelCallback()} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-sky-600 rounded-lg" title="Cancel"><Cancel className="material-symbols-outlined text-lg" /></button>
+                        <button type="button" onClick={() => saveCallback && saveCallback({ id: task?.id, name, category, duration })} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-sky-600 rounded-lg" title="Save Row"><CheckCircle className="material-symbols-outlined text-lg" /></button>
+                        <button type="button" onClick={() => deleteCallback && deleteCallback(task?.id || "")} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-red-500 rounded-lg" title="Delete"><Delete className="material-symbols-outlined text-lg" /></button>
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 
-export default function Modal({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => void; children: React.ReactNode }) {
+export default function Modal({ title, isOpen, onClose, children }: { title: string; isOpen: boolean; onClose: () => void; children: React.ReactNode }) {
     if (!isOpen) return null;
 
     return (
@@ -21,7 +21,7 @@ export default function Modal({ isOpen, onClose, children }: { isOpen: boolean; 
                 {/* <!-- Modal Header --> */}
                 <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">Create New Idea</h2>
+                        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
                         <p className="text-slate-500 text-sm">Design the architectural work breakdown structure</p>
                     </div>
 

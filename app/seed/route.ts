@@ -101,7 +101,7 @@ async function seedRevenue() {
   return insertedRevenue;
 }
 
-async function seedIdeas() { 
+async function seedIdeas() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await sql`
     CREATE TABLE IF NOT EXISTS ideas (
@@ -117,6 +117,48 @@ async function seedIdeas() {
   `;
 }
 
+async function seedProject() {
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS projects (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      source_idea_id UUID,
+      description TEXT,
+      status VARCHAR(50) DEFAULT 'Active',
+      start_date DATE,
+      end_date DATE,
+      team_members UUID[] DEFAULT '{}',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (source_idea_id) REFERENCES ideas(id)
+    )
+  `;
+}
+
+async function seedTasks() {
+  await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      category VARCHAR(100),
+      duration INT,
+      description TEXT,
+      project_id UUID NOT NULL,
+      status VARCHAR(50) DEFAULT 'Pending',
+      start_date DATE,
+      end_date DATE,
+      is_leaf_node BOOLEAN DEFAULT true,
+      parent_task_id UUID,
+      priority VARCHAR(50) DEFAULT 'Medium',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+      FOREIGN KEY (project_id) REFERENCES projects(id),
+      FOREIGN KEY (parent_task_id) REFERENCES tasks(id) ON DELETE CASCADE
+    )
+  `;
+}
+
 export async function GET() {
   try {
     const result = await sql.begin((sql) => [
@@ -125,6 +167,8 @@ export async function GET() {
       seedInvoices(),
       seedRevenue(),
       seedIdeas(),
+      seedProject(),
+      seedTasks(),
     ]);
 
     return Response.json({ message: 'Database seeded successfully' });

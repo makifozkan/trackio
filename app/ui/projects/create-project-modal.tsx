@@ -1,16 +1,30 @@
 import { ExpandMore, AccountTree, ChevronRight, SubdirectoryArrowRight, AddCircle, Layers, Schedule, Edit, Delete, DragIndicator } from "@mui/icons-material";
 import ProjectTask from "./project-task";
 import { Idea, Project, Task } from "@/app/lib/definitions";
-import { useCallback, useEffect, useState } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import { fetchIdeas } from "@/app/lib/ideas-actions";
 import { generateProjectPlan } from "@/app/lib/gemini-actions";
+import { createProject } from "@/app/lib/project-actions";
+
 export default function CreateProjectModal({ project }: { project: Partial<Project> }) {
+    const initialState = { message: '', errors: {} };
+    const [state, formAction] = useActionState(createProject, initialState);
     const [tasks, setTasks] = useState<Partial<Task>[]>(project?.tasks || []);
+    const [projectName, setProjectName] = useState(project?.name || '');
+    const [projectDescription, setProjectDescription] = useState(project?.description || '');
     const [ideas, setIdeas] = useState<Idea[]>([]);
+    const [selectedIdeaId, setSelectedIdeaId] = useState<string>(project?.source_idea_id || "");
     const fetchIdeasWrapper = async () => {
         const ideas = await fetchIdeas();
         console.log("Fetched ideas:", ideas);
         setIdeas(ideas);
+    }
+
+    const handleSubmit = async (formData: FormData) => {
+        formData.append("projectData", JSON.stringify({ ...project, source_idea_id: selectedIdeaId, name: projectName, description: projectDescription, tasks } as Partial<Project>));
+
+        const result = await formAction(formData);
+        console.log("Form submission result:", result);
     }
 
     useEffect(() => {
@@ -22,6 +36,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
             ...prev,
             {
                 id: `task-${prev.length + 1}`,
+                order: prev.length + 1,
                 name: `New Task ${prev.length + 1}`,
                 description: '',
             }
@@ -29,7 +44,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
     };
 
     const autoGenerateHierarchy = async () => {
-        const generatedTasks = await generateProjectPlan(project?.source_idea?.title || "");
+        const generatedTasks = await generateProjectPlan(ideas.find((i) => i.id === selectedIdeaId)?.title || "");
         if (generatedTasks) {
             console.log("Generated tasks from Gemini:", generatedTasks);
             setTasks(generatedTasks);
@@ -63,19 +78,33 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
     };
 
     return (
-        <>
+        <form action={handleSubmit} className="flex flex-1 overflow-y-auto flex-col">
             {/* <!-- Scrollable Content --> */}
             <div className="flex-1 overflow-y-auto p-8 space-y-8 group">
                 {/* <!-- Selection Section --> */}
                 <div className="space-y-3">
                     <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1">Select Idea</label>
                     <div className="relative group">
-                        <select defaultValue={1} className="w-full bg-none appearance-none bg-slate-100 border-none rounded-xl px-4 py-3.5 font-medium text-slate-700 focus:ring-2 focus:ring-sky-500/20 cursor-pointer">
-                            {ideas.map(idea => <option key={idea.id}>{idea.title}</option>)}
+                        <select value={selectedIdeaId} onChange={(e) => setSelectedIdeaId(e.target.value)} className="w-full bg-none appearance-none bg-slate-100 border-none rounded-xl px-4 py-3.5 font-medium text-slate-700 focus:ring-2 focus:ring-sky-500/20 cursor-pointer">
+                            {ideas.map(idea => <option key={idea.id} value={idea.id}>{idea.title}</option>)}
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-focus-within:rotate-180">
                             <ExpandMore className="text-slate-400" />
                         </div>
+                    </div>
+                </div>
+                {/* <!-- Project Title --> */}
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1 font-manrope">Project Title</label>
+                    <div className="relative">
+                        <input onChange={(e) => setProjectName(e.target.value)} value={projectName} className="w-full bg-slate-100/60 border-none rounded-xl px-4 py-4 font-manrope font-semibold text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all shadow-sm shadow-slate-200/50" placeholder="Enter project title..." type="text" />
+                    </div>
+                </div>
+                {/* <!-- Project Description --> */}
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1 font-manrope">Project Description</label>
+                    <div className="relative">
+                        <textarea onChange={(e) => setProjectDescription(e.target.value)} value={projectDescription} className="w-full bg-slate-100/60 border-none rounded-xl px-4 py-4 font-manrope text-sm text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all resize-none shadow-sm shadow-slate-200/50" placeholder="Describe the strategic objectives..." rows={4}></textarea>
                     </div>
                 </div>
                 {/* <!-- Architectural Tree View --> */}
@@ -91,7 +120,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                     <div className="space-y-6 relative">
                         {tasks.map(task => <ProjectTask key={task.id} task={task} saveTaskCallback={saveEdit} deleteTaskCallback={removeSubTask} />)}
                         {/* <!-- Add Task Trigger --> */}
-                        <button onClick={addNewTask} className="flex items-center gap-3 px-4 py-3 w-full border border-dashed border-slate-200 rounded-xl text-slate-400 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all font-medium text-sm group mt-6">
+                        <button type="button" onClick={addNewTask} className="flex items-center gap-3 px-4 py-3 w-full border border-dashed border-slate-200 rounded-xl text-slate-400 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition-all font-medium text-sm group mt-6">
                             <AddCircle className="material-symbols-outlined group-hover:scale-110 transition-transform" />
                             Append New Primary Task
                         </button>
@@ -115,11 +144,11 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
             </div>
             {/* <!-- Modal Footer --> */}
             <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between rounded-b-2xl">
-                <button className="px-6 py-2.5 font-bold text-slate-500 hover:text-slate-700 transition-colors">
+                <button type="button" className="px-6 py-2.5 font-bold text-slate-500 hover:text-slate-700 transition-colors">
                     Discard Draft
                 </button>
                 <div className="flex items-center gap-4">
-                    <button className="px-6 py-2.5 font-bold text-sky-700 hover:bg-sky-100 rounded-lg transition-colors">
+                    <button type="button" className="px-6 py-2.5 font-bold text-sky-700 hover:bg-sky-100 rounded-lg transition-colors">
                         Save as Template
                     </button>
                     <button className="px-8 py-2.5 bg-sky-700 text-white font-bold rounded-lg shadow-lg shadow-sky-900/10 hover:bg-sky-800 hover:-translate-y-0.5 active:translate-y-0 transition-all">
@@ -127,6 +156,6 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                     </button>
                 </div>
             </div>
-        </>
+        </form>
     );
 }
