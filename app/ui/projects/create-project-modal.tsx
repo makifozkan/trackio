@@ -1,9 +1,21 @@
 import { ExpandMore, AccountTree, ChevronRight, SubdirectoryArrowRight, AddCircle, Layers, Schedule, Edit, Delete, DragIndicator } from "@mui/icons-material";
 import ProjectTask from "./project-task";
-import { Project, Task } from "@/app/lib/definitions";
-import { useCallback, useState } from "react";
+import { Idea, Project, Task } from "@/app/lib/definitions";
+import { useCallback, useEffect, useState } from "react";
+import { fetchIdeas } from "@/app/lib/ideas-actions";
+import { generateProjectPlan } from "@/app/lib/gemini-actions";
 export default function CreateProjectModal({ project }: { project: Partial<Project> }) {
     const [tasks, setTasks] = useState<Partial<Task>[]>(project?.tasks || []);
+    const [ideas, setIdeas] = useState<Idea[]>([]);
+    const fetchIdeasWrapper = async () => {
+        const ideas = await fetchIdeas();
+        console.log("Fetched ideas:", ideas);
+        setIdeas(ideas);
+    }
+
+    useEffect(() => {
+        fetchIdeasWrapper();
+    }, []);
 
     const addNewTask = () => {
         setTasks(prev => [
@@ -14,6 +26,14 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                 description: '',
             }
         ]);
+    };
+
+    const autoGenerateHierarchy = async () => {
+        const generatedTasks = await generateProjectPlan(project?.source_idea?.title || "");
+        if (generatedTasks) {
+            console.log("Generated tasks from Gemini:", generatedTasks);
+            setTasks(generatedTasks);
+        }
     };
 
     const removeSubTask = (id: string) => {
@@ -32,6 +52,16 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
         });
     }, [project]);
 
+    const calculateWorkingDays = (tasks: Partial<Task>[], sum: number): number => {
+        if (tasks.length === 0) {
+            return sum;
+        }
+
+        const currentTotal = tasks.reduce((total, task) => total + (task?.duration ?? 0), sum);
+        const subTaskTotals = tasks.reduce((total, task) => total + calculateWorkingDays(task?.sub_tasks || [], 0), 0);
+        return currentTotal + subTaskTotals;
+    };
+
     return (
         <>
             {/* <!-- Scrollable Content --> */}
@@ -41,9 +71,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                     <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1">Select Idea</label>
                     <div className="relative group">
                         <select defaultValue={1} className="w-full bg-none appearance-none bg-slate-100 border-none rounded-xl px-4 py-3.5 font-medium text-slate-700 focus:ring-2 focus:ring-sky-500/20 cursor-pointer">
-                            <option>Decentralized Finance for SMEs</option>
-                            <option>Cross-border Settlement Engine</option>
-                            <option>Real Estate Tokenization Portal</option>
+                            {ideas.map(idea => <option key={idea.id}>{idea.title}</option>)}
                         </select>
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-transform duration-200 group-focus-within:rotate-180">
                             <ExpandMore className="text-slate-400" />
@@ -54,7 +82,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1">Work Breakdown Structure</label>
-                        <button className="text-sky-600 text-sm font-semibold hover:text-sky-700 flex items-center gap-1">
+                        <button onClick={autoGenerateHierarchy} className="text-sky-600 text-sm font-semibold hover:text-sky-700 flex items-center gap-1">
                             <AccountTree className="text-sm" />
                             Auto-generate Hierarchy
                         </button>
@@ -73,7 +101,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                 <div className="grid grid-cols-3 gap-6">
                     <div className="p-4 rounded-xl bg-sky-50/50 border border-sky-100/50">
                         <p className="text-[10px] font-black uppercase tracking-widest text-sky-700/50">Estimated Duration</p>
-                        <p className="text-xl font-bold text-sky-900">11 Working Days</p>
+                        <p className="text-xl font-bold text-sky-900">{calculateWorkingDays(tasks, 0)} Working Days</p>
                     </div>
                     <div className="p-4 rounded-xl bg-slate-50/50 border border-slate-100">
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Resource Intensity</p>
@@ -81,7 +109,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                     </div>
                     <div className="p-4 rounded-xl bg-slate-50/50 border border-slate-100">
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Node Count</p>
-                        <p className="text-xl font-bold text-slate-800">5 Deliverables</p>
+                        <p className="text-xl font-bold text-slate-800">{tasks.length} Deliverables</p>
                     </div>
                 </div>
             </div>

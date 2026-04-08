@@ -105,7 +105,7 @@ export default function ProjectTask({ task, saveTaskCallback, deleteTaskCallback
                   </h4>
                   <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-medium">
                     <span className="flex items-center gap-1">
-                      <Schedule /> {task?.duration || 2} days
+                      <Schedule /> {task?.duration || 0} days
                     </span>
                     <span className="flex items-center gap-1">
                       <Layers /> {subtasks.length} Sub-tasks

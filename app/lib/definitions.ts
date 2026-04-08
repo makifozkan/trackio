@@ -110,7 +110,7 @@ export type Project = {
   start_date: string;
   end_date: string;
   team_members?: User[];
-  tasks?: Task[];
+  tasks?: Partial<Task>[];
 };
 
 export type Task = {

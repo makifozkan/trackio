@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function ProjectTaskEditable({ task, cancelCallback, saveCallback, deleteCallback }: { task?: Partial<Task>; cancelCallback?: () => void; saveCallback?: (task: Partial<Task>) => void; deleteCallback?: (id: string) => void }) {
     const [name, setName] = useState(task?.name);
     const [category, setCategory] = useState(task?.category);
-    const [duration, setDuration] = useState(task?.duration || 2);
+    const [duration, setDuration] = useState(task?.duration || 0);
 
     return <div className="relative">
         <div className="flex items-center gap-4 group">
@@ -18,7 +18,6 @@ export default function ProjectTaskEditable({ task, cancelCallback, saveCallback
                         <input className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500" type="text" value={name} onChange={(event) => setName(event.target.value)} />
                         <div className="relative w-40">
                             <select className="w-full bg-none appearance-none bg-indigo-50 border-none rounded-lg px-3 py-1.5 text-[10px] font-black uppercase text-indigo-600 focus:ring-0 cursor-pointer" value={category} onChange={(event) => setCategory(event.target.value)}>
-                                <option selected={true}>Smart Contracts</option>
                                 <option>Frontend</option>
                                 <option>Security</option>
                                 <option>Backend</option>
@@ -36,7 +35,7 @@ export default function ProjectTaskEditable({ task, cancelCallback, saveCallback
                             <input onChange={(event) => setDuration(Number(event.target.value))} className="w-16 bg-slate-50 border border-slate-200 rounded px-2 py-0.5 text-center focus:ring-1 focus:ring-sky-500" type="number" value={duration} />
                             <span>days</span>
                         </div>
-                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">layers</span> 2 Sub-tasks</span>
+                        <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">layers</span> {task?.sub_tasks?.length || 0} Sub-tasks</span>
                     </div>
                     <div className="flex items-center gap-1">
                         <button onClick={() => cancelCallback && cancelCallback()} className="p-1.5 hover:bg-slate-50 text-slate-400 hover:text-sky-600 rounded-lg" title="Cancel"><Cancel className="material-symbols-outlined text-lg" /></button>

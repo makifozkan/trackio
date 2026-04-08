@@ -130,3 +130,14 @@ export async function saveIdea(idea: any) {
     }
 }
 
+export async function fetchIdeas() {
+    try {
+        const ideas = await sql<Idea[]>`
+            SELECT * FROM ideas`;
+        return ideas;
+    } catch (error) {
+        console.error('Error fetching ideas:', error);
+        throw new Error('Data error: Failed to fetch ideas.');
+    }
+}
+
