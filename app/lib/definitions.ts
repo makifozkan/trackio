@@ -99,3 +99,35 @@ export type Idea = {
   is_ai_generated: boolean;
   created_at: string;
 };
+
+export type Project = {
+  id: string;
+  name: string;
+  source_idea_id: string;
+  source_idea?: Idea;
+  description: string;
+  status: 'Active' | 'Completed' | 'On Hold';
+  start_date: string;
+  end_date: string;
+  team_members?: User[];
+  tasks?: Task[];
+};
+
+export type Task = {
+  id: string;
+  name: string;
+  category: string;
+  duration: number; // Duration in days
+  description: string;
+  project_id: string;
+  project?: Project;
+  status: 'Pending' | 'In Progress' | 'Completed';
+  start_date: string;
+  end_date: string;
+  is_leaf_node: boolean;
+  parent_task_id?: string;
+  parent_task?: Task;
+  priority: 'Low' | 'Medium' | 'High';
+  sub_tasks?: Partial<Task>[];
+  is_expanded?: boolean; // For UI state management
+};
