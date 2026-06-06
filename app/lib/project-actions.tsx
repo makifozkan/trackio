@@ -5,6 +5,8 @@ import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { Project, Task } from './definitions';
+import { collection, addDoc } from 'firebase/firestore';
+import firestore from './firebase';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -57,6 +59,7 @@ export async function createProject(prevState: State, data: FormData) {
     }
 
     const { id, name, description, status, tasks, source_idea_id } = validatedFields.data;
+    await creativeProjectInFirestore(parsedData);
 
     try {
         await sql.begin(async (sql) => {
@@ -83,9 +86,6 @@ export async function createProject(prevState: State, data: FormData) {
 
             await insertTasks(tasks);
         });
-
-        revalidatePath('/dashboard/projects');
-        redirect('/dashboard/projects');
     } catch (error) {
         console.error('Error creating project:', error);
         return {
@@ -93,4 +93,106 @@ export async function createProject(prevState: State, data: FormData) {
         }
     }
 
+    revalidatePath('/dashboard/projects');
+    redirect('/dashboard/projects');
+}
+
+export async function fetchProjects() {
+    try {
+        const projects = await sql`
+            SELECT id, name, description, status, source_idea_id
+            FROM projects
+        `;
+        return projects;
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+        return [];
+    }
+}
+
+// fetch project by id with tasks and sub-tasks by joining projects and tasks tables
+export async function fetchProjectById(projectId: string) {
+    try {
+        const projectData = await sql`
+            SELECT p.id, p.name, p.description, p.status, p.source_idea_id,
+                json_agg(json_build_object(
+                    'id', t.id,
+                    'name', t.name,
+                    'description', t.description,
+                    'sub_tasks', (
+                        SELECT json_agg(json_build_object(
+                            'id', st.id,
+                            'name', st.name,
+                            'description', st.description
+                        ))
+                        FROM tasks st
+                        WHERE st.parent_task_id = t.id
+                    )
+                )) AS tasks
+            FROM projects p
+            LEFT JOIN tasks t ON p.id = t.project_id
+            WHERE p.id = ${projectId}
+            GROUP BY p.id
+        `;
+        return projectData;
+    } catch (error) {
+        console.error('Error fetching project by ID:', error);
+        return null;
+    }
+}
+
+
+export async function deleteProject(projectId: string) {
+    try {
+        await sql.begin(async (sql) => {
+            await sql`
+                DELETE FROM tasks
+                WHERE project_id = ${projectId}
+            `;
+
+            await sql`
+                DELETE FROM projects
+                WHERE id = ${projectId}
+            `;
+        });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        return;
+    }
+
+    revalidatePath('/dashboard/projects');
+    redirect('/dashboard/projects');
+}
+
+
+export async function fetchFilteredProjects(query: string, currentPage: number) {
+    const ITEMS_PER_PAGE = 10;
+    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+    try {
+        const projects = await sql<Project[]>`
+            SELECT projects.id, projects.name, projects.description, projects.status, 
+                projects.source_idea_id,
+                json_build_object('id', ideas.id, 'title', ideas.title) AS source_idea
+            FROM projects
+            LEFT JOIN ideas ON projects.source_idea_id = ideas.id
+            WHERE projects.name ILIKE ${`%${query}%`}
+            LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
+        `;
+        return projects;
+    } catch (error) {
+        console.error('Error fetching filtered projects:', error);
+        return [];
+    }
+}
+
+
+export async function creativeProjectInFirestore(project: Partial<Project>) {
+    try {
+        // Assuming you have a Firestore instance initialized as `db`
+        const docRef = await addDoc(collection(firestore.db, 'projects'), project);
+        console.log('Project created with ID:', docRef.id);
+    } catch (error) {
+        console.error('Error creating project in Firestore:', error);
+    }
 }

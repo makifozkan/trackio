@@ -68,7 +68,7 @@ export async function generateIdeas(keywords: string[]) {
 }
 
 export async function generateProjectPlan(idea: string) {
-    const fullCyclePrompt = `Create a detailed non-generic project plan with tasks and sub-tasks for the following project idea: ${idea}`;
+    const fullCyclePrompt = `Create a detailed distinctive full low-level production ready exhaustive implementation plan with tasks and sub-tasks for the following project idea: ${idea}`;
 
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",

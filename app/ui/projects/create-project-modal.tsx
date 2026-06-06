@@ -111,7 +111,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1">Work Breakdown Structure</label>
-                        <button onClick={autoGenerateHierarchy} className="text-sky-600 text-sm font-semibold hover:text-sky-700 flex items-center gap-1">
+                        <button type="button" onClick={autoGenerateHierarchy} className="text-sky-600 text-sm font-semibold hover:text-sky-700 flex items-center gap-1">
                             <AccountTree className="text-sm" />
                             Auto-generate Hierarchy
                         </button>
