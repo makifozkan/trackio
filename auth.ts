@@ -8,8 +8,11 @@ import postgres from 'postgres';
 import GoogleProvider from "next-auth/providers/google";
 import Apple from 'next-auth/providers/apple';
 import GitHub from 'next-auth/providers/github';
+import PostgresAdapter from "@auth/pg-adapter"
+import { Pool } from "@neondatabase/serverless"
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function getUser(email: string): Promise<User | undefined> {
     try {
@@ -24,6 +27,10 @@ async function getUser(email: string): Promise<User | undefined> {
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
+    adapter: PostgresAdapter(pool),
+    session: {
+        strategy: 'jwt',
+    },
     providers: [
         Credentials({
             async authorize(credentials) {
@@ -63,6 +70,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         GitHub({
             clientId: process.env.GITHUB_ID,
             clientSecret: process.env.GITHUB_SECRET,
-        })
+        }),
     ],
 });

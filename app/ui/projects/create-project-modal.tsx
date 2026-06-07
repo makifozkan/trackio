@@ -6,12 +6,13 @@ import { Idea, Project, Task } from "@/app/lib/definitions";
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { fetchIdeas } from "@/app/lib/ideas-actions";
 import { generateProjectPlan } from "@/app/lib/gemini-actions";
-import { createProject } from "@/app/lib/project-actions";
+import { createProject, updateProject } from "@/app/lib/project-actions";
 import { ProjectDetailSkeleton } from "../skeletons";
 
-export default function CreateProjectModal({ project }: { project: Partial<Project> | Project | null }) {
+export default function CreateProjectModal({ project }: { project?: Partial<Project> | Project | null }) {
     const initialState = { message: '', errors: {} };
     const [state, formAction] = useActionState(createProject, initialState);
+    const [updateState, updateAction] = useActionState(updateProject, initialState);
     const [tasks, setTasks] = useState<Partial<Task>[]>(project?.tasks || []);
     const [projectName, setProjectName] = useState(project?.name || '');
     const [projectDescription, setProjectDescription] = useState(project?.description || '');
@@ -29,7 +30,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
     const handleSubmit = async (formData: FormData) => {
         formData.append("projectData", JSON.stringify({ ...project, source_idea_id: selectedIdeaId, name: projectName, description: projectDescription, tasks } as Partial<Project>));
 
-        const result = await formAction(formData);
+        const result = project?.id ? await updateAction(formData) : await formAction(formData);
         console.log("Form submission result:", result);
     }
 

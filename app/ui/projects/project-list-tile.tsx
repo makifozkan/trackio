@@ -3,7 +3,7 @@ import { MoreVert, Architecture } from '@mui/icons-material'
 
 export default function ProjectListTile({ project }: { project: Project }) {
     return (<div className="bg-white rounded-2xl p-6 flex items-center gap-8 shadow-sm hover:shadow-md transition-shadow border-none group">
-        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
             <Architecture />
         </div>
         <div className="flex-1 grid grid-cols-3 gap-8 items-center">

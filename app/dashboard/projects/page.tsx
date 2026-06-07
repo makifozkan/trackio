@@ -5,7 +5,7 @@ import Modal from "@/app/ui/common/modal";
 import CreateProjectModal from "@/app/ui/projects/create-project-modal";
 import ProjectListTile from "@/app/ui/projects/project-list-tile";
 import ProjectsHeader from "@/app/ui/projects/projects-header";
-import { CardsSkeleton, ProjectsListSkeleton } from "@/app/ui/skeletons";
+import { ProjectsListSkeleton } from "@/app/ui/skeletons";
 import { Suspense } from "react";
 
 export default async function Page(props: {

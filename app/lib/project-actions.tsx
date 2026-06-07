@@ -11,15 +11,27 @@ import firestore from './firebase';
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 const TaskSchema: z.ZodType<Partial<Task>> = z.lazy(() => z.object({
-    id: z.string(),
+    id: z.string().optional(),
     name: z.string(),
     duration: z.number().optional(),
-    description: z.string(),
-    sub_tasks: z.array(TaskSchema),
+    description: z.string().optional(),
+    sub_tasks: z.array(TaskSchema).optional(),
 }));
 
 const ProjectSchema = z.object({
-    id: z.string(),
+    id: z.string().optional(),
+    name: z.string(),
+    description: z.string().optional(),
+    status: z.string().optional(),
+    tasks: z.array(TaskSchema),
+    source_idea_id: z.string(),
+});
+
+const ProjectUpdateSchema = z.object({
+    id: z.string({
+        required_error: 'Project ID is required',
+        invalid_type_error: 'Project ID must be a string',
+    }),
     name: z.string(),
     description: z.string(),
     status: z.string().optional(),
@@ -40,7 +52,7 @@ export type State = {
 export async function createProject(prevState: State, data: FormData) {
     const rawData = data.get("projectData") as string;
     const parsedData = JSON.parse(rawData) as Partial<Project>;
-    console.log("Parsed data:", parsedData);
+    console.log("Parsed create data:", parsedData);
 
     const validatedFields = ProjectSchema.safeParse({
         id: parsedData.id,
@@ -64,7 +76,7 @@ export async function createProject(prevState: State, data: FormData) {
         await sql.begin(async (sql) => {
             const [project] = await sql`
                 INSERT INTO projects (name, description, source_idea_id)
-                VALUES (${name}, ${description}, ${source_idea_id})
+                VALUES (${name}, ${description || ''}, ${source_idea_id})
                 RETURNING id
             `;
 
@@ -163,6 +175,47 @@ export async function deleteProject(projectId: string) {
     redirect('/dashboard/projects');
 }
 
+export async function updateProject(prevState: State, data: FormData) {
+    const rawData = data.get("projectData") as string;
+    const parsedData = JSON.parse(rawData) as Partial<Project>;
+    console.log("Parsed update data:", parsedData);
+
+    const validatedFields = ProjectUpdateSchema.safeParse({
+        id: parsedData.id,
+        name: parsedData.name,
+        description: parsedData.description,
+        status: parsedData.status,
+        tasks: parsedData.tasks,
+        source_idea_id: parsedData.source_idea_id,
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing Fields. Failed to Update Project.',
+        }
+    }
+
+    const { id, name, description, status, tasks, source_idea_id } = validatedFields.data;
+
+    try {
+        await sql.begin(async (sql) => {
+            await sql`
+            UPDATE projects
+            SET name = ${name}, description = ${description || ''}, status = ${status || ''}
+            WHERE id = ${id}`;
+        });
+
+    } catch (error) {
+        console.error('Error updating project:', error);
+        return {
+            message: 'An error occurred while updating the project.',
+        }
+    }
+
+    revalidatePath('/dashboard/projects');
+    redirect('/dashboard/projects');
+}
 
 export async function fetchFilteredProjects(query: string, currentPage: number) {
     const ITEMS_PER_PAGE = 10;

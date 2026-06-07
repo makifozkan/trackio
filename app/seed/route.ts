@@ -6,14 +6,58 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  
   await sql`
-    CREATE TABLE IF NOT EXISTS users (
-      id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
-    );
-  `;
+  CREATE TABLE IF NOT EXISTS verification_token
+  (
+    identifier TEXT NOT NULL,
+    expires TIMESTAMPTZ NOT NULL,
+    token TEXT NOT NULL,
+  
+    PRIMARY KEY (identifier, token)
+  );`;
+
+  await sql`
+  CREATE TABLE IF NOT EXISTS accounts
+  (
+    id SERIAL,
+    "userId" UUID NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    provider VARCHAR(255) NOT NULL,
+    "providerAccountId" VARCHAR(255) NOT NULL,
+    refresh_token TEXT,
+    access_token TEXT,
+    expires_at BIGINT,
+    id_token TEXT,
+    scope TEXT,
+    session_state TEXT,
+    token_type TEXT,
+  
+    PRIMARY KEY (id)
+  );`;
+
+  await sql`
+  CREATE TABLE IF NOT EXISTS sessions
+  (
+    id SERIAL,
+    "userId" UUID NOT NULL,
+    expires TIMESTAMPTZ NOT NULL,
+    "sessionToken" VARCHAR(255) NOT NULL,
+  
+    PRIMARY KEY (id)
+  );`;
+
+  await sql`
+  CREATE TABLE IF NOT EXISTS users
+  (
+    id UUID DEFAULT uuid_generate_v4(),
+    name VARCHAR(255),
+    email VARCHAR(255),
+    "emailVerified" TIMESTAMPTZ,
+    image TEXT,
+    password TEXT,
+    PRIMARY KEY (id)
+  );`;
 
   const insertedUsers = await Promise.all(
     users.map(async (user) => {

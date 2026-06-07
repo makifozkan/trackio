@@ -29,7 +29,7 @@ export default function ProjectsHeader() {
 
             {/* <CreateProjectModal /> */}
             <Modal title='Create New Project' isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                <CreateProjectModal project={{ id: 'test-project' }} />
+                <CreateProjectModal />
             </Modal>
         </div>
     );

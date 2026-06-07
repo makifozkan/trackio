@@ -11,8 +11,7 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       console.log('pathname: ', nextUrl.pathname)
       if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        return isLoggedIn;
       } else if (isLoggedIn) {
         if (['/login', '/register'].some(path => nextUrl.pathname === path)) {
           return Response.redirect(new URL('/dashboard', nextUrl));
@@ -27,7 +26,7 @@ export const authConfig = {
     },
     async redirect({ url, baseUrl }) {
       return '/dashboard';
-    }
+    },
   },
   providers: [], // Add providers with an empty array for now
 } satisfies NextAuthConfig;
