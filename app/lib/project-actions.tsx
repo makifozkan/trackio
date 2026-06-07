@@ -59,7 +59,6 @@ export async function createProject(prevState: State, data: FormData) {
     }
 
     const { id, name, description, status, tasks, source_idea_id } = validatedFields.data;
-    await creativeProjectInFirestore(parsedData);
 
     try {
         await sql.begin(async (sql) => {
@@ -113,7 +112,7 @@ export async function fetchProjects() {
 // fetch project by id with tasks and sub-tasks by joining projects and tasks tables
 export async function fetchProjectById(projectId: string) {
     try {
-        const projectData = await sql`
+        const projectData = await sql<Project[]>`
             SELECT p.id, p.name, p.description, p.status, p.source_idea_id,
                 json_agg(json_build_object(
                     'id', t.id,
@@ -134,7 +133,7 @@ export async function fetchProjectById(projectId: string) {
             WHERE p.id = ${projectId}
             GROUP BY p.id
         `;
-        return projectData;
+        return projectData[0] || null;
     } catch (error) {
         console.error('Error fetching project by ID:', error);
         return null;

@@ -1,3 +1,5 @@
+"use client";
+
 import { ExpandMore, AccountTree, ChevronRight, SubdirectoryArrowRight, AddCircle, Layers, Schedule, Edit, Delete, DragIndicator } from "@mui/icons-material";
 import ProjectTask from "./project-task";
 import { Idea, Project, Task } from "@/app/lib/definitions";
@@ -5,8 +7,9 @@ import { useActionState, useCallback, useEffect, useState } from "react";
 import { fetchIdeas } from "@/app/lib/ideas-actions";
 import { generateProjectPlan } from "@/app/lib/gemini-actions";
 import { createProject } from "@/app/lib/project-actions";
+import { ProjectDetailSkeleton } from "../skeletons";
 
-export default function CreateProjectModal({ project }: { project: Partial<Project> }) {
+export default function CreateProjectModal({ project }: { project: Partial<Project> | Project | null }) {
     const initialState = { message: '', errors: {} };
     const [state, formAction] = useActionState(createProject, initialState);
     const [tasks, setTasks] = useState<Partial<Task>[]>(project?.tasks || []);
@@ -14,8 +17,11 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
     const [projectDescription, setProjectDescription] = useState(project?.description || '');
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [selectedIdeaId, setSelectedIdeaId] = useState<string>(project?.source_idea_id || "");
+    const [isModalLoading, setIsModalLoading] = useState(false);
     const fetchIdeasWrapper = async () => {
+        setIsModalLoading(true);
         const ideas = await fetchIdeas();
+        setIsModalLoading(false);
         console.log("Fetched ideas:", ideas);
         setIdeas(ideas);
     }
@@ -29,7 +35,15 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
 
     useEffect(() => {
         fetchIdeasWrapper();
+        console.log("Current project data on mount:", project);
     }, []);
+
+    useEffect(() => {
+        setTasks(project?.tasks || []);
+        setProjectName(project?.name || '');
+        setProjectDescription(project?.description || '');
+        setSelectedIdeaId(project?.source_idea_id || "");
+    }, [project]);
 
     const addNewTask = () => {
         setTasks(prev => [
@@ -78,7 +92,7 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
     };
 
     return (
-        <form action={handleSubmit} className="flex flex-1 overflow-y-auto flex-col">
+        (isModalLoading ? <ProjectDetailSkeleton /> : <form action={handleSubmit} className="flex flex-1 overflow-y-auto flex-col">
             {/* <!-- Scrollable Content --> */}
             <div className="flex-1 overflow-y-auto p-8 space-y-8 group">
                 {/* <!-- Selection Section --> */}
@@ -156,6 +170,6 @@ export default function CreateProjectModal({ project }: { project: Partial<Proje
                     </button>
                 </div>
             </div>
-        </form>
+        </form>)
     );
 }

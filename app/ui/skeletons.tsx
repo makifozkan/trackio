@@ -125,6 +125,71 @@ export function IdeaCardsSkeleton() {
   );
 }
 
+export function ProjectsListSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      <ProjectListTileSkeleton />
+      <ProjectListTileSkeleton />
+      <ProjectListTileSkeleton />
+      <ProjectListTileSkeleton />
+    </div>
+  );
+}
+
+export function ProjectListTileSkeleton() {
+  return (
+    <div className={`${shimmer} relative flex flex-row overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm p-6`}>
+      <div className="flex w-full items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-10 rounded-md bg-gray-100" />
+          <div className="h-12 w-20 rounded-md bg-gray-100" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-12 w-80 rounded-md bg-gray-100" />
+          <div className="h-12 w-28 rounded-md bg-gray-100" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-12 w-14 rounded-md bg-gray-100" />
+          <div className="h-12 w-10 rounded-md bg-gray-100" />
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+
+export function ProjectDetailSkeleton() {
+  return (
+    <div className={`${shimmer} h-[90vh] relative flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-sm p-6`}>
+      <div className="flex items-center justify-between">
+        <div className="h-12 w-full rounded-md bg-gray-100" />
+
+      </div>
+
+      <div className="mt-6 flex-1">
+        <div className="h-7 w-3/4 rounded-md bg-gray-100" />
+        <div className="mt-4 space-y-2">
+          <div className="h-4 w-full rounded-md bg-gray-100" />
+          <div className="h-4 w-full rounded-md bg-gray-100" />
+          <div className="h-4 w-2/3 rounded-md bg-gray-100" />
+        </div>
+      </div>
+
+      <div className="mt-8 flex gap-2">
+        <div className="h-6 w-12 rounded-md bg-gray-100" />
+        <div className="h-6 w-16 rounded-md bg-gray-100" />
+        <div className="h-6 w-14 rounded-md bg-gray-100" />
+      </div>
+
+      <div className="mt-6 flex items-center justify-between border-t border-gray-50 pt-4">
+        <div className="h-4 w-28 rounded-md bg-gray-100" />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardSkeleton() {
   return (
     <>
