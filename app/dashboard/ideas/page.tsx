@@ -1,16 +1,18 @@
 import { Suspense } from 'react';
-import { fetchSavedIdeas } from '@/app/lib/ideas-actions';
+import { fetchIdeasByUserId, fetchSavedIdeas } from '@/app/lib/ideas-actions';
 import { IdeasHeader } from '@/app/ui/ideas/ideas-header';
 import { IdeaCard } from '@/app/ui/ideas/idea-card';
 import { IdeaCardsSkeleton } from '@/app/ui/skeletons';
 import { Metadata } from 'next';
+import { getActiveUser } from '@/app/lib/actions';
 
 export const metadata: Metadata = {
   title: 'Ideas | Trackio',
 };
 
 async function IdeasList() {
-  const ideas = await fetchSavedIdeas();
+  const user = await getActiveUser(); // Replace with actual session retrieval logic
+  const ideas = await fetchIdeasByUserId(user?.id); // Replace with actual user ID from session
 
   if (ideas.length === 0) {
     return (
@@ -29,13 +31,13 @@ async function IdeasList() {
   return (
     <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
       {ideas.map((idea: any) => (
-        <IdeaCard 
-            key={idea.id} 
-            title={idea.title}
-            description={idea.description}
-            tags={idea.keywords || []}
-            status={idea.status}
-            updatedAt={new Date(idea.created_at).toLocaleDateString()}
+        <IdeaCard
+          key={idea.id}
+          title={idea.title}
+          description={idea.description}
+          tags={idea.keywords || []}
+          status={idea.status}
+          updatedAt={new Date(idea.created_at).toLocaleDateString()}
         />
       ))}
     </div>
@@ -47,7 +49,7 @@ export default function Page() {
     <main className="min-h-screen">
       <div className="mx-auto">
         <IdeasHeader />
-        
+
         <Suspense fallback={<IdeaCardsSkeleton />}>
           <IdeasList />
         </Suspense>

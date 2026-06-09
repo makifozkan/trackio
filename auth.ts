@@ -10,19 +10,10 @@ import Apple from 'next-auth/providers/apple';
 import GitHub from 'next-auth/providers/github';
 import PostgresAdapter from "@auth/pg-adapter"
 import { Pool } from "@neondatabase/serverless"
+import { getUser } from './app/lib/auth-actions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-
-async function getUser(email: string): Promise<User | undefined> {
-    try {
-        const user = await sql<User[]>`SELECT * FROM users WHERE email=${email}`;
-        return user[0];
-    } catch (error) {
-        console.error('Failed to fetch user:', error);
-        throw new Error('Failed to fetch user.');
-    }
-}
 
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
@@ -69,7 +60,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         }),
         GitHub({
             clientId: process.env.GITHUB_ID,
-            clientSecret: process.env.GITHUB_SECRET,
+            clientSecret: process.env.GITHUB_SECRET
         }),
     ],
 });

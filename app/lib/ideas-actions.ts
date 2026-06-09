@@ -4,6 +4,7 @@ import { Idea } from './definitions';
 import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { getActiveUser } from './actions';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -48,12 +49,21 @@ export async function createIdea(prevState: State, formData: FormData) {
         };
     }
 
+    const active_user = await getActiveUser();
+
+    if (!active_user || !active_user.id) {
+        return {
+            message: 'Authentication Error: User not logged in.',
+        };
+    }
+
     const { title, description, categories, keywords, status, is_ai_generated } = validatedFields.data;
 
     try {
+
         await sql`
-            INSERT INTO ideas (title, description, categories, keywords, status, is_ai_generated)
-            VALUES (${title}, ${description}, ${categories}, ${keywords}, ${status}, ${is_ai_generated})
+            INSERT INTO ideas (title, description, categories, keywords, status, is_ai_generated, user_id)
+            VALUES (${title}, ${description}, ${categories}, ${keywords}, ${status}, ${is_ai_generated}, ${active_user?.id})
         `;
     } catch (error) {
         return {
@@ -140,4 +150,21 @@ export async function fetchIdeas() {
         throw new Error('Data error: Failed to fetch ideas.');
     }
 }
+
+
+export async function fetchIdeasByUserId(userId?: string) {
+    if (!userId) {
+        throw new Error('Authentication Error: User ID is required to fetch ideas.');
+    }
+
+    try {
+        const ideas = await sql<Idea[]>`
+            SELECT * FROM ideas WHERE user_id = ${userId} ORDER BY created_at DESC`;
+        return ideas;
+    } catch (error) {
+        console.error('Error fetching ideas by user ID:', error);
+        throw new Error('Data error: Failed to fetch ideas by user ID.');
+    }
+}
+
 

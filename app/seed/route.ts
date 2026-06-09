@@ -6,7 +6,7 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
-  
+
   await sql`
   CREATE TABLE IF NOT EXISTS verification_token
   (
@@ -156,7 +156,10 @@ async function seedIdeas() {
       keywords VARCHAR(100)[] NOT NULL,
       status VARCHAR(50) DEFAULT 'Draft',
       is_ai_generated BOOLEAN NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      user_id UUID NOT NULL,
+      
+      FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `;
 }
@@ -174,7 +177,10 @@ async function seedProject() {
       end_date DATE,
       team_members UUID[] DEFAULT '{}',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (source_idea_id) REFERENCES ideas(id)
+      user_id UUID NOT NULL,
+
+      FOREIGN KEY (source_idea_id) REFERENCES ideas(id),
+      FOREIGN KEY (user_id) REFERENCES users(id)
     )
   `;
 }
@@ -196,8 +202,10 @@ async function seedTasks() {
       parent_task_id UUID,
       priority VARCHAR(50) DEFAULT 'Medium',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      user_id UUID NOT NULL,
 
       FOREIGN KEY (project_id) REFERENCES projects(id),
+      FOREIGN KEY (user_id) REFERENCES users(id),
       FOREIGN KEY (parent_task_id) REFERENCES tasks(id) ON DELETE CASCADE
     )
   `;

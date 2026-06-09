@@ -4,7 +4,14 @@ import { z } from 'zod';
 import postgres from 'postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { signOut, auth } from '@/auth';
 
+
+export const getActiveUser = async () => {
+    const session = await auth();
+    console.log("getActiveUser called, session: ", session);
+    return session?.user;
+}
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 

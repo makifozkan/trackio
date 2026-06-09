@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { getUser } from './app/lib/auth-actions';
 
 export const authConfig = {
   pages: {
@@ -21,11 +22,23 @@ export const authConfig = {
       return false;
     },
     signIn({ account, profile }) {
-      console.log("signIn called");
-      return true;
+      console.log("signIn called", { account, profile });
+
+      return !account?.userId;
     },
     async redirect({ url, baseUrl }) {
       return '/dashboard';
+    },
+    async jwt({ token, user }) {
+      console.log("jwt called", { token, user });
+
+      return token;
+    },
+    session({ session, token }) {
+      session.user.id = token.sub || '';
+      console.log("session called", { session, token });
+
+      return session;
     },
   },
   providers: [], // Add providers with an empty array for now
