@@ -3,7 +3,7 @@ export function Button({ title = "Submit" }: { title: string }) {
         <button className="inline-block 
         w-full
         md:w-auto
-        rounded-sm
+        rounded-xs
         bg-sky-600
         px-8
         md:px-12

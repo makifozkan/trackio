@@ -1,6 +1,6 @@
 export default function Card({ keywords, title, description, status, updatedAt }: { keywords?: string[], title: string, description?: string, status?: string, updatedAt?: Date }) {
     return (
-        <article className="block bg-white rounded-md border border-gray-300 p-4 shadow-sm sm:p-6">
+        <article className="block bg-white rounded-md border border-gray-300 p-4 shadow-xs sm:p-6">
             <time dateTime="2022-10-10" className="block text-xs text-gray-500"> {updatedAt?.toLocaleDateString()} </time>
 
             <a href="#">

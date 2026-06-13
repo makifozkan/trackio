@@ -89,7 +89,7 @@ export default function LoginForm() {
 
               <input type="email" id="email" name="email"
                 placeholder="Enter your email address"
-                required className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm" />
+                required className="mt-0.5 w-full rounded-sm border-gray-300 shadow-xs sm:text-sm" />
             </label>
           </div>
           <div className="mt-4">
@@ -99,7 +99,7 @@ export default function LoginForm() {
               <input type="password" id="password" name="password"
                 placeholder="Enter password"
                 required
-                minLength={6} className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm" />
+                minLength={6} className="mt-0.5 w-full rounded-sm border-gray-300 shadow-xs sm:text-sm" />
             </label>
           </div>
         </div>

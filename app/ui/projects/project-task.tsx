@@ -80,20 +80,20 @@ export default function ProjectTask({ task, saveTaskCallback, deleteTaskCallback
           <ProjectTaskEditable task={task} cancelCallback={cancelEdit} saveCallback={saveTaskCallbackWrapper} deleteCallback={deleteTaskCallback} />
         ) : (
           <div className="flex items-center gap-4 group">
-            <div className="flex-1 bg-white border border-slate-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex-1 bg-white border border-slate-100 rounded-xl p-4 shadow-xs hover:shadow-md transition-shadow">
               <div className="flex-1 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {task?.is_expanded ? (
                     <button type="button"
                       onClick={() => setIsExpandedWrapper(false)}
-                      className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-400"
+                      className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded-sm text-slate-400"
                     >
                       <ExpandMore className="text-slate-400 text-sm" />
                     </button>
                   ) : (
                     <button type="button"
                       onClick={() => setIsExpandedWrapper(true)}
-                      className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded text-slate-400"
+                      className="w-6 h-6 flex items-center justify-center bg-slate-100 rounded-sm text-slate-400"
                     >
                       <ChevronRight className="text-sm" />
                     </button>
@@ -101,7 +101,7 @@ export default function ProjectTask({ task, saveTaskCallback, deleteTaskCallback
                   <div>
                     <h4 className="font-bold text-slate-800 flex items-center gap-2">
                       {task?.name || "--"}
-                      <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-indigo-50 text-indigo-600">
+                      <span className="px-2 py-0.5 rounded-sm text-[10px] font-black uppercase bg-indigo-50 text-indigo-600">
                         {task?.category || "Uncategorized"}
                       </span>
                     </h4>

@@ -112,14 +112,14 @@ export default function CreateProjectModal({ project }: { project?: Partial<Proj
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1 font-manrope">Project Title</label>
                     <div className="relative">
-                        <input onChange={(e) => setProjectName(e.target.value)} value={projectName} className="w-full bg-slate-100/60 border-none rounded-xl px-4 py-4 font-manrope font-semibold text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all shadow-sm shadow-slate-200/50" placeholder="Enter project title..." type="text" />
+                        <input onChange={(e) => setProjectName(e.target.value)} value={projectName} className="w-full bg-slate-100/60 border-none rounded-xl px-4 py-4 font-manrope font-semibold text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all shadow-xs shadow-slate-200/50" placeholder="Enter project title..." type="text" />
                     </div>
                 </div>
                 {/* <!-- Project Description --> */}
                 <div className="space-y-2">
                     <label className="text-xs font-bold uppercase tracking-widest text-slate-400 px-1 font-manrope">Project Description</label>
                     <div className="relative">
-                        <textarea onChange={(e) => setProjectDescription(e.target.value)} value={projectDescription} className="w-full bg-slate-100/60 border-none rounded-xl px-4 py-4 font-manrope text-sm text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all resize-none shadow-sm shadow-slate-200/50" placeholder="Describe the strategic objectives..." rows={4}></textarea>
+                        <textarea onChange={(e) => setProjectDescription(e.target.value)} value={projectDescription} className="w-full bg-slate-100/60 border-none rounded-xl px-4 py-4 font-manrope text-sm text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0EA5E9]/20 transition-all resize-none shadow-xs shadow-slate-200/50" placeholder="Describe the strategic objectives..." rows={4}></textarea>
                     </div>
                 </div>
                 {/* <!-- Architectural Tree View --> */}

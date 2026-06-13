@@ -12,8 +12,8 @@ export default function ProjectLeafTask() {
                     </div>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-1 hover:text-sky-600 text-slate-400 rounded transition-colors" title="Edit Sub-task"><Edit className="text-base" /></button>
-                    <button className="p-1 hover:text-red-500 text-slate-400 rounded transition-colors" title="Delete Sub-task"><Delete className="text-base" /></button>
+                    <button className="p-1 hover:text-sky-600 text-slate-400 rounded-sm transition-colors" title="Edit Sub-task"><Edit className="text-base" /></button>
+                    <button className="p-1 hover:text-red-500 text-slate-400 rounded-sm transition-colors" title="Delete Sub-task"><Delete className="text-base" /></button>
                 </div>
             </div>
         </div>

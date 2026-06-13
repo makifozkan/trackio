@@ -52,7 +52,7 @@ export default function Navigation({ user, signOutAction }: NavProps) {
       {/* SideNav Drawer Overlay */}
       <div 
         className={clsx(
-          "fixed inset-0 z-50 bg-gray-900/40 backdrop-blur-sm transition-opacity md:hidden",
+          "fixed inset-0 z-50 bg-gray-900/40 backdrop-blur-xs transition-opacity md:hidden",
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
         onClick={toggleMenu}
@@ -110,7 +110,7 @@ export default function Navigation({ user, signOutAction }: NavProps) {
                 <img 
                   src={user.image} 
                   alt={user.name || 'User profile'} 
-                  className="h-10 w-10 rounded-full object-cover shadow-sm border border-white" 
+                  className="h-10 w-10 rounded-full object-cover shadow-xs border border-white" 
                   referrerPolicy="no-referrer"
                 />
               ) : (

@@ -3,7 +3,7 @@ import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { Architecture } from '@mui/icons-material'
 export default function ProjectCard({ project }: { project: Project }) {
     return (
-        <div className="bg-white rounded-2xl p-6 flex items-center gap-8 shadow-sm hover:shadow-md transition-shadow border-none group">
+        <div className="bg-white rounded-2xl p-6 flex items-center gap-8 shadow-xs hover:shadow-md transition-shadow border-none group">
             <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                 <Architecture />
             </div>

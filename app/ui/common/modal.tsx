@@ -21,7 +21,7 @@ export default function Modal({ title, isOpen, onClose, children, returnTo }: { 
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity md:block hidden"
+                className="absolute inset-0 bg-gray-900/40 backdrop-blur-xs transition-opacity md:block hidden"
                 onClick={onCloseHandler}
             />
             <div className={clsx(

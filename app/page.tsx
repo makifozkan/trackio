@@ -52,7 +52,7 @@ export default function Page() {
               </a>
             </div>
 
-            <button className="block rounded-sm bg-gray-100 p-2.5 text-gray-600 transition hover:text-gray-600/75 md:hidden">
+            <button className="block rounded-xs bg-gray-100 p-2.5 text-gray-600 transition hover:text-gray-600/75 md:hidden">
               <span className="sr-only">Toggle menu</span>
               <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -77,11 +77,11 @@ export default function Page() {
           </p>
 
           <div className="mt-4 flex gap-4 sm:mt-6">
-            <a className="inline-block rounded border border-blue-600 bg-blue-600 px-5 py-3 font-medium text-white shadow-sm transition-colors hover:bg-blue-700" href="#">
+            <a className="inline-block rounded-sm border border-blue-600 bg-blue-600 px-5 py-3 font-medium text-white shadow-xs transition-colors hover:bg-blue-700" href="#">
               Get Started
             </a>
 
-            <a className="inline-block rounded border border-gray-200 px-5 py-3 font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-900" href="#">
+            <a className="inline-block rounded-sm border border-gray-200 px-5 py-3 font-medium text-gray-700 shadow-xs transition-colors hover:bg-gray-50 hover:text-gray-900" href="#">
               Learn More
             </a>
           </div>

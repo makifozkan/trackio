@@ -79,7 +79,7 @@ export default function Page() {
                                 </li>
 
                                 <li>
-                                    <a href="#" className="w-full rounded-lg px-4 py-2 [text-align:_inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                                    <a href="#" className="w-full rounded-lg px-4 py-2 [text-align:inherit] text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                                         Logout
                                     </a>
                                 </li>
