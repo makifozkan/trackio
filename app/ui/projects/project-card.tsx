@@ -39,6 +39,8 @@ export default function ProjectCard({ project }: { project: Project }) {
               className="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-slate-200"
             >
               <Image
+                width={100}
+                height={100}
                 alt="team-member"
                 className="w-full h-full object-cover"
                 data-alt="portrait of a young woman professional against a neutral background"

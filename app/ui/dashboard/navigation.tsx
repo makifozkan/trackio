@@ -163,6 +163,8 @@ export default function Navigation({ user, signOutAction }: NavProps) {
             <div className="flex items-center gap-3 px-2 mb-6">
               {user?.image ? (
                 <Image
+                  width={100}
+                  height={100}
                   src={user.image}
                   alt={user.name || 'User profile'}
                   className="h-10 w-10 rounded-full object-cover shadow-xs border border-white"

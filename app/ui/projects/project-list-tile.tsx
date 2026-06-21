@@ -35,6 +35,8 @@ export default function ProjectListTile({ project }: { project: Project }) {
         <div className="flex -space-x-2">
           <div className="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-slate-200">
             <Image
+              width={100}
+              height={100}
               alt="avatar"
               className="w-full h-full object-cover"
               data-alt="portrait of a young woman professional against a neutral background"
@@ -43,6 +45,8 @@ export default function ProjectListTile({ project }: { project: Project }) {
           </div>
           <div className="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-slate-200">
             <Image
+              width={100}
+              height={100}
               alt="sample"
               className="w-full h-full object-cover"
               data-alt="professional male portrait with natural lighting"

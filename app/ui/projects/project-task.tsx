@@ -52,7 +52,7 @@ export default function ProjectTask({
 
   useEffect(() => {
     saveTaskCallback && saveTaskCallback({ id: task?.id, sub_tasks: subtasks });
-  }, [subtasks]);
+  }, [saveTaskCallback, subtasks, task]);
 
   const setIsExpandedWrapper = (expanded: boolean) => {
     saveTaskCallback && saveTaskCallback({ id: task?.id, is_expanded: expanded });
@@ -181,11 +181,15 @@ export default function ProjectTask({
                   </label>
                   <div className="flex -space-x-2 overflow-hidden">
                     <Image
+                      width={100}
+                      height={100}
                       alt="Member"
                       className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOwHP9FBxlMvT_2eV2mwKpFSZ4kcJmeWkFbu0xAosGirjezHfmefvQUz-NSflglRes1hhxGjiTlcnN3auovaJDdBN55v8JInpu35rjXRNf6YLk4XYf0n-yAkn4zokMrbZGgw-eOKgN1ASwfmlzZlNn_hX_59hH3xQQhN3U1iou8mwE3tLgME8iZS5N_mdgiJ_Kt-gfA90Jcm_9wjCkHDfRSiEoJSPcYWWStFcg4fMRA7F_NpDTEFC6AOour64KdtcAlLb5KF8Qmw"
                     />
                     <Image
+                      width={100}
+                      height={100}
                       alt="Member"
                       className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDBCfeGjMvsCH9-B67-0aJnNvjP0QtvICNuky4SHTr-r-bBCIHN-6qAwi49HF9TTwQkQwEPNCs42kHYm156OlqZ6B24XdsAuKvjIX91h7Gk5LMHkjY2Qgn_L49ndQ52tBXcksJ2dprR8TDju6HvCb7vwYC-mwTXOqZpiIMdpdiQoW6DUVzqBeL9ed4rDB12vWIH61gkpqgBV2iEZpy9IYwU1eeEQIOmQguT-tAWEmdCGtJChdVmtUrKjtCJre9Eohv8TLtLgcf6A"

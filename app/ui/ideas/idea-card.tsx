@@ -24,6 +24,8 @@ export function IdeaCard({ title, description, tags, status, updatedAt, imageUrl
       {imageUrl && (
         <div className="aspect-video w-full overflow-hidden">
           <Image
+            width={100}
+            height={100}
             src={imageUrl}
             alt={title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
