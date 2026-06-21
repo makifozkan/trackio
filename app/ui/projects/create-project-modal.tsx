@@ -33,7 +33,7 @@ export default function CreateProjectModal({
   const [projectDescription, setProjectDescription] = useState(project?.description || '');
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [selectedIdeaId, setSelectedIdeaId] = useState<string>(project?.source_idea_id || '');
-  const [isModalLoading, setIsModalLoading] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(true);
 
   const handleSubmit = async (formData: FormData) => {
     formData.append(
