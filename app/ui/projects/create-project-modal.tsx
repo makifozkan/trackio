@@ -62,7 +62,7 @@ export default function CreateProjectModal({
 
     fetchIdeasWrapper();
     console.log('Current project data on mount:', project);
-  });
+  }, [project]);
 
   useEffect(() => {
     const updateInternalProject = () => {
@@ -97,9 +97,9 @@ export default function CreateProjectModal({
     }
   };
 
-  const removeSubTask = (id: string) => {
+  const removeSubTask = useCallback((id: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
   const saveEdit = useCallback((task: Partial<Task>) => {
     console.log('Saving task:', task);

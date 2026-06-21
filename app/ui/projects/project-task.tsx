@@ -32,9 +32,9 @@ export default function ProjectTask({
   const [subtasks, setSubtasks] = useState<Partial<Task>[]>(task?.sub_tasks || []);
   const [isEditing, setIsEditing] = useState(false);
 
-  const removeSubTask = (id: string) => {
+  const removeSubTask = useCallback((id: string) => {
     setSubtasks((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
   const addSubTask = () => {
     setSubtasks((prev) => [
@@ -52,7 +52,7 @@ export default function ProjectTask({
 
   useEffect(() => {
     saveTaskCallback && saveTaskCallback({ id: task?.id, sub_tasks: subtasks });
-  }, [saveTaskCallback, subtasks, task]);
+  }, [saveTaskCallback, task?.id, subtasks]);
 
   const setIsExpandedWrapper = (expanded: boolean) => {
     saveTaskCallback && saveTaskCallback({ id: task?.id, is_expanded: expanded });
