@@ -4,9 +4,7 @@ const shimmer =
 
 export function CardSkeleton() {
   return (
-    <div
-      className={`${shimmer} relative overflow-hidden rounded-xl bg-gray-100 p-2 shadow-xs`}
-    >
+    <div className={`${shimmer} relative overflow-hidden rounded-xl bg-gray-100 p-2 shadow-xs`}>
       <div className="flex p-4">
         <div className="h-5 w-5 rounded-md bg-gray-200" />
         <div className="ml-2 h-6 w-16 rounded-md bg-gray-200 text-sm font-medium" />
@@ -61,9 +59,7 @@ export function InvoiceSkeleton() {
 
 export function LatestInvoicesSkeleton() {
   return (
-    <div
-      className={`${shimmer} relative flex w-full flex-col overflow-hidden md:col-span-4`}
-    >
+    <div className={`${shimmer} relative flex w-full flex-col overflow-hidden md:col-span-4`}>
       <div className="mb-4 h-8 w-36 rounded-md bg-gray-100" />
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-100 p-4">
         <div className="bg-white px-6">
@@ -84,7 +80,9 @@ export function LatestInvoicesSkeleton() {
 
 export function IdeaCardSkeleton() {
   return (
-    <div className={`${shimmer} relative flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-xs p-6`}>
+    <div
+      className={`${shimmer} relative flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-xs p-6`}
+    >
       <div className="flex items-center justify-between">
         <div className="h-5 w-24 rounded-full bg-gray-100" />
         <div className="h-5 w-5 rounded-full bg-gray-100" />
@@ -138,7 +136,9 @@ export function ProjectsListSkeleton() {
 
 export function ProjectListTileSkeleton() {
   return (
-    <div className={`${shimmer} relative flex flex-row overflow-hidden rounded-xl bg-white border border-gray-100 shadow-xs p-6`}>
+    <div
+      className={`${shimmer} relative flex flex-row overflow-hidden rounded-xl bg-white border border-gray-100 shadow-xs p-6`}
+    >
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="h-12 w-10 rounded-md bg-gray-100" />
@@ -152,20 +152,18 @@ export function ProjectListTileSkeleton() {
           <div className="h-12 w-14 rounded-md bg-gray-100" />
           <div className="h-12 w-10 rounded-md bg-gray-100" />
         </div>
-
       </div>
-
     </div>
   );
 }
 
-
 export function ProjectDetailSkeleton() {
   return (
-    <div className={`${shimmer} h-[90vh] relative flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-xs p-6`}>
+    <div
+      className={`${shimmer} h-[90vh] relative flex flex-col overflow-hidden rounded-xl bg-white border border-gray-100 shadow-xs p-6`}
+    >
       <div className="flex items-center justify-between">
         <div className="h-12 w-full rounded-md bg-gray-100" />
-
       </div>
 
       <div className="mt-6 flex-1">
@@ -193,9 +191,7 @@ export function ProjectDetailSkeleton() {
 export default function DashboardSkeleton() {
   return (
     <>
-      <div
-        className={`${shimmer} relative mb-4 h-8 w-36 overflow-hidden rounded-md bg-gray-100`}
-      />
+      <div className={`${shimmer} relative mb-4 h-8 w-36 overflow-hidden rounded-md bg-gray-100`} />
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <CardSkeleton />
         <CardSkeleton />
@@ -302,10 +298,7 @@ export function InvoicesTableSkeleton() {
                 <th scope="col" className="px-3 py-5 font-medium">
                   Status
                 </th>
-                <th
-                  scope="col"
-                  className="relative pb-4 pl-3 pr-6 pt-2 sm:pr-6"
-                >
+                <th scope="col" className="relative pb-4 pl-3 pr-6 pt-2 sm:pr-6">
                   <span className="sr-only">Edit</span>
                 </th>
               </tr>

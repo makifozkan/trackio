@@ -88,7 +88,6 @@ export type InvoiceForm = {
   status: 'pending' | 'paid';
 };
 
-
 export type Idea = {
   id: string;
   title: string;

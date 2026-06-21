@@ -24,7 +24,8 @@ export const Desktop: Story = {
     user: {
       name: 'John Doe',
       email: 'john@example.com',
-      image: 'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?auto=format&fit=crop&q=80&w=1160',
+      image:
+        'https://images.unsplash.com/photo-1600486913747-55e5470d6f40?auto=format&fit=crop&q=80&w=1160',
     },
   },
 };

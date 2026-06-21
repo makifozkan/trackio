@@ -1,3 +1,3 @@
 export default function Page() {
-    return (<div>LaunchPad Page</div>);
+  return <div>LaunchPad Page</div>;
 }

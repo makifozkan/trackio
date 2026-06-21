@@ -1,6 +1,7 @@
-export function Button({ title = "Submit" }: { title: string }) {
-    return (
-        <button className="inline-block 
+export function Button({ title = 'Submit' }: { title: string }) {
+  return (
+    <button
+      className="inline-block 
         w-full
         md:w-auto
         rounded-xs
@@ -14,8 +15,9 @@ export function Button({ title = "Submit" }: { title: string }) {
         lg:text-base
         font-medium 
         text-white 
-        hover:bg-sky-700">
-            {title}
-        </button>
-    );
+        hover:bg-sky-700"
+    >
+      {title}
+    </button>
+  );
 }

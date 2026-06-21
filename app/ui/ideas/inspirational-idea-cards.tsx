@@ -1,12 +1,15 @@
-import { generateIdeas } from "@/app/lib/gemini-actions";
-import Card from "./hyperui-card";
-import { Suspense } from "react";
+import { generateIdeas } from '@/app/lib/gemini-actions';
+import Card from './hyperui-card';
+import { Suspense } from 'react';
 
 export default async function InspirationalIdeaCards() {
-    const ideas = await generateIdeas(["tech"]);
+  const ideas = await generateIdeas(['tech']);
 
-    return (
-        <>
-            {ideas.map((idea) => (<Card key={idea.title} {...idea} />))}
-        </>);
+  return (
+    <>
+      {ideas.map((idea) => (
+        <Card key={idea.title} {...idea} />
+      ))}
+    </>
+  );
 }

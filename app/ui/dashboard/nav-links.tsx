@@ -1,6 +1,5 @@
 'use client';
 
-
 import {
   UserGroupIcon,
   HomeIcon,
@@ -8,7 +7,7 @@ import {
   LightBulbIcon,
   RocketLaunchIcon,
   Square3Stack3DIcon,
-  QueueListIcon
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -34,7 +33,7 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
       {links.map((link) => {
         const LinkIcon = link.icon;
         const isActive = pathname === link.href;
-        
+
         return (
           <li key={link.name}>
             <Link
@@ -42,8 +41,8 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
               onClick={onItemClick}
               className={clsx(
                 'group relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200',
-                isActive 
-                  ? 'bg-white text-indigo-600 shadow-xs' 
+                isActive
+                  ? 'bg-white text-indigo-600 shadow-xs'
                   : 'text-gray-500 hover:bg-white/50 hover:text-gray-700'
               )}
             >
@@ -51,11 +50,13 @@ export default function NavLinks({ onItemClick }: { onItemClick?: () => void }) 
               {isActive && (
                 <span className="absolute left-0 h-4 w-1 rounded-r-full bg-indigo-600" />
               )}
-              
-              <LinkIcon className={clsx(
-                "h-5 w-5 transition-colors",
-                isActive ? "text-indigo-600" : "text-gray-400 group-hover:text-gray-600"
-              )} />
+
+              <LinkIcon
+                className={clsx(
+                  'h-5 w-5 transition-colors',
+                  isActive ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-600'
+                )}
+              />
               {link.name}
             </Link>
           </li>

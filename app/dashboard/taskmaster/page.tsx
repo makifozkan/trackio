@@ -1,3 +1,3 @@
 export default function Page() {
-    return (<div>Taskmaster Page</div>);
+  return <div>Taskmaster Page</div>;
 }

@@ -9,10 +9,5 @@ export default async function SideNav() {
     await signOut({ redirectTo: '/' });
   };
 
-  return (
-    <Navigation 
-      user={session?.user} 
-      signOutAction={handleSignOut} 
-    />
-  );
+  return <Navigation user={session?.user} signOutAction={handleSignOut} />;
 }

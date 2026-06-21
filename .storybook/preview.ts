@@ -2,14 +2,14 @@
 
 import '@/app/ui/global.css'; // replace with the name of your tailwind css file
 
-import type { Preview } from '@storybook/nextjs-vite'
+import type { Preview } from '@storybook/nextjs-vite';
 
 const preview: Preview = {
   parameters: {
     controls: {
       matchers: {
-       color: /(background|color)$/i,
-       date: /Date$/i,
+        color: /(background|color)$/i,
+        date: /Date$/i,
       },
     },
 
@@ -17,8 +17,8 @@ const preview: Preview = {
       // 'todo' - show a11y violations in the test UI only
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
-      test: 'todo'
-    }
+      test: 'todo',
+    },
   },
 };
 

@@ -14,7 +14,6 @@ export default function LoginPage() {
             <LoginForm />
           </Suspense>
         </div>
-
       </div>
     </main>
   );
