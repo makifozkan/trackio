@@ -22,8 +22,10 @@ import { ProjectDetailSkeleton } from '../skeletons';
 
 export default function CreateProjectModal({
   project,
+  ideas,
 }: {
-  project?: Partial<Project> | Project | null;
+  project: Project | null;
+  ideas: Idea[];
 }) {
   const initialState = { message: '', errors: {} };
   const [state, formAction] = useActionState(createProject, initialState);
@@ -31,9 +33,7 @@ export default function CreateProjectModal({
   const [tasks, setTasks] = useState<Partial<Task>[]>(project?.tasks || []);
   const [projectName, setProjectName] = useState(project?.name || '');
   const [projectDescription, setProjectDescription] = useState(project?.description || '');
-  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [selectedIdeaId, setSelectedIdeaId] = useState<string>(project?.source_idea_id || '');
-  const [isModalLoading, setIsModalLoading] = useState(true);
 
   const handleSubmit = async (formData: FormData) => {
     formData.append(
@@ -50,19 +50,6 @@ export default function CreateProjectModal({
     const result = project?.id ? await updateAction(formData) : await formAction(formData);
     console.log('Form submission result:', result);
   };
-
-  useEffect(() => {
-    const fetchIdeasWrapper = async () => {
-      setIsModalLoading(true);
-      const ideas = await fetchIdeas();
-      setIsModalLoading(false);
-      console.log('Fetched ideas:', ideas);
-      setIdeas(ideas);
-    };
-
-    fetchIdeasWrapper();
-    console.log('Current project data on mount:', project);
-  }, [project]);
 
   useEffect(() => {
     const updateInternalProject = () => {
@@ -126,9 +113,7 @@ export default function CreateProjectModal({
     return currentTotal + subTaskTotals;
   };
 
-  return isModalLoading ? (
-    <ProjectDetailSkeleton />
-  ) : (
+  return (
     <form action={handleSubmit} className="flex flex-1 overflow-y-auto flex-col">
       {/* <!-- Scrollable Content --> */}
       <div className="flex-1 overflow-y-auto p-8 space-y-8 group">

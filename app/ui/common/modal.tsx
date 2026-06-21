@@ -1,8 +1,10 @@
 'use client';
 
+import { ProjectPageContext } from '@/app/dashboard/projects/project-page-context';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { useRouter } from 'next/navigation';
+import { useContext, useEffect } from 'react';
 
 export default function Modal({
   title,
@@ -18,11 +20,13 @@ export default function Modal({
   returnTo?: string;
 }) {
   const router = useRouter();
+  const context = useContext(ProjectPageContext);
 
   if (!isOpen) return null;
 
   const onCloseHandler = () => {
     {
+      context.setLoading?.(false);
       if (onClose) {
         onClose();
       } else {

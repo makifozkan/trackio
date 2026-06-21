@@ -5,8 +5,14 @@ import Modal from '@/app/ui/common/modal';
 import CreateProjectModal from '@/app/ui/projects/create-project-modal';
 import ProjectListTile from '@/app/ui/projects/project-list-tile';
 import ProjectsHeader from '@/app/ui/projects/projects-header';
-import { ProjectsListSkeleton } from '@/app/ui/skeletons';
+import UpdateProjectModal from '@/app/ui/projects/update-project-modal';
+import { ProjectDetailSkeleton, ProjectsListSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
+import Link from 'next/link';
+import ClickableProjectTile from '@/app/ui/projects/clickable-project-section';
+import ProjectClientLoading from '@/app/ui/projects/project-client-loading';
+import ProjectPageContext from './project-page-context';
+import ProjectPageContextProvider from './project-page-context';
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -19,25 +25,26 @@ export default async function Page(props: {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const projectId = searchParams?.projectId;
-  let project: Project | null = null;
-
-  if (projectId) {
-    project = await fetchProjectById(projectId);
-  }
 
   return (
     <div>
       <ProjectsHeader />
-      <div className="space-y-4">
-        <Suspense fallback={<ProjectsListSkeleton />}>
-          <ProjectSection query={query} currentPage={currentPage} />
-        </Suspense>
-      </div>
-      {projectId && (
-        <Modal title="Update Project" isOpen={true}>
-          <CreateProjectModal project={project} />
-        </Modal>
-      )}
+      <ProjectPageContextProvider>
+        {!projectId && <ProjectClientLoading />}
+
+        <div className="space-y-4">
+          <Suspense fallback={<ProjectsListSkeleton />}>
+            <ProjectSection query={query} currentPage={currentPage} />
+          </Suspense>
+        </div>
+        {projectId && (
+          <Modal title="Update Project" isOpen={true}>
+            <Suspense fallback={<ProjectDetailSkeleton />}>
+              <UpdateProjectModal projectId={projectId} />
+            </Suspense>
+          </Modal>
+        )}
+      </ProjectPageContextProvider>
     </div>
   );
 }
@@ -47,9 +54,7 @@ async function ProjectSection({ query, currentPage }: { query: string; currentPa
   return (
     <>
       {projects.map((project) => (
-        <Clickable key={project.id} id={project.id}>
-          <ProjectListTile project={project} />
-        </Clickable>
+        <ClickableProjectTile key={project.id} project={project} />
       ))}
     </>
   );
