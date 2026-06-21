@@ -17,4 +17,6 @@ if (!getApps().length) {
 
 export const db = getFirestore();
 
-export default { db };
+const firebase = { db };
+
+export default firebase;

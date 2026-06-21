@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import NavLinks from './nav-links';
+import Image from 'next/image';
 
 interface NavProps {
   user?: {
@@ -161,7 +162,7 @@ export default function Navigation({ user, signOutAction }: NavProps) {
           <div className="mt-auto pt-8 border-t border-gray-200/50">
             <div className="flex items-center gap-3 px-2 mb-6">
               {user?.image ? (
-                <img
+                <Image
                   src={user.image}
                   alt={user.name || 'User profile'}
                   className="h-10 w-10 rounded-full object-cover shadow-xs border border-white"

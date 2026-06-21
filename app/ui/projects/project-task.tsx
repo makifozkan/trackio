@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { use, useCallback, useEffect, useState } from 'react';
 import { set } from 'zod';
 import ProjectTaskEditable from './project-task-editable';
+import Image from 'next/image';
 
 export default function ProjectTask({
   task,
@@ -61,22 +62,19 @@ export default function ProjectTask({
     setIsEditing(false);
   };
 
-  const saveEdit = useCallback(
-    (task: Partial<Task>) => {
-      console.log('Saving task:', task);
-      // Save logic here
-      setSubtasks((prev) => {
-        const index = prev.findIndex((t) => t.id === task.id);
-        if (index !== -1) {
-          prev[index] = { ...prev[index], ...task };
-        }
-        return [...prev];
-      });
+  const saveEdit = useCallback((task: Partial<Task>) => {
+    console.log('Saving task:', task);
+    // Save logic here
+    setSubtasks((prev) => {
+      const index = prev.findIndex((t) => t.id === task.id);
+      if (index !== -1) {
+        prev[index] = { ...prev[index], ...task };
+      }
+      return [...prev];
+    });
 
-      setIsEditing(false);
-    },
-    [task]
-  );
+    setIsEditing(false);
+  }, []);
 
   const saveTaskCallbackWrapper = (task: Partial<Task>) => {
     saveTaskCallback && saveTaskCallback(task);
@@ -182,12 +180,12 @@ export default function ProjectTask({
                     Assigned To
                   </label>
                   <div className="flex -space-x-2 overflow-hidden">
-                    <img
+                    <Image
                       alt="Member"
                       className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOwHP9FBxlMvT_2eV2mwKpFSZ4kcJmeWkFbu0xAosGirjezHfmefvQUz-NSflglRes1hhxGjiTlcnN3auovaJDdBN55v8JInpu35rjXRNf6YLk4XYf0n-yAkn4zokMrbZGgw-eOKgN1ASwfmlzZlNn_hX_59hH3xQQhN3U1iou8mwE3tLgME8iZS5N_mdgiJ_Kt-gfA90Jcm_9wjCkHDfRSiEoJSPcYWWStFcg4fMRA7F_NpDTEFC6AOour64KdtcAlLb5KF8Qmw"
                     />
-                    <img
+                    <Image
                       alt="Member"
                       className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
                       src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDBCfeGjMvsCH9-B67-0aJnNvjP0QtvICNuky4SHTr-r-bBCIHN-6qAwi49HF9TTwQkQwEPNCs42kHYm156OlqZ6B24XdsAuKvjIX91h7Gk5LMHkjY2Qgn_L49ndQ52tBXcksJ2dprR8TDju6HvCb7vwYC-mwTXOqZpiIMdpdiQoW6DUVzqBeL9ed4rDB12vWIH61gkpqgBV2iEZpy9IYwU1eeEQIOmQguT-tAWEmdCGtJChdVmtUrKjtCJre9Eohv8TLtLgcf6A"

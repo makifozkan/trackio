@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export default function Page() {
   return (
     <div className="flex h-screen flex-col justify-between border-e border-gray-100 bg-white">
@@ -133,7 +135,7 @@ export default function Page() {
 
       <div className="sticky inset-x-0 bottom-0 border-t border-gray-100">
         <a href="#" className="flex items-center gap-2 bg-white p-4 hover:bg-gray-50">
-          <img
+          <Image
             alt=""
             src="https://images.unsplash.com/photo-1600486913747-55e5470d6f40?auto=format&amp;fit=crop&amp;q=80&amp;w=1160"
             className="size-10 rounded-full object-cover"

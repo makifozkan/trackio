@@ -24,6 +24,7 @@ export const Primary: ProjectCard = {
       name: 'Project Name',
       description: 'Project Description',
       status: 'Active',
+      created_at: '',
       source_idea: {
         title: 'Source Idea Title',
         description: 'Source Idea Description',

@@ -1,5 +1,6 @@
 import { Project } from '@/app/lib/definitions';
 import { MoreVert, Architecture } from '@mui/icons-material';
+import Image from 'next/image';
 
 export default function ProjectListTile({ project }: { project: Project }) {
   return (
@@ -33,14 +34,16 @@ export default function ProjectListTile({ project }: { project: Project }) {
       <div className="flex items-center gap-4">
         <div className="flex -space-x-2">
           <div className="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-slate-200">
-            <img
+            <Image
+              alt="avatar"
               className="w-full h-full object-cover"
               data-alt="portrait of a young woman professional against a neutral background"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwiI-qwfy16T8LSrm8ICFFaGmOB-uRXenEUIcKTx2e1wSamXnhxt_DCanOhjfHSwfCrWPUua7mefL-rMcM4TELWma7C-wW5GMSiUADJRYSSGurug4Hnhjo3nmQTIaaKLFPIZyD2lKFICysALIHaA-NQRstc2d1PHzBgJ7hX6M7mrwxGAObgEURZCt1sPqweqM1aoQ2kbgtD4u9CkJlOwpGfpSU3AgQNYj4ekrkysNU5VhoFx7MOzD_9qWfD6CiwoAQzg9bNthDlQ"
             />
           </div>
           <div className="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-slate-200">
-            <img
+            <Image
+              alt="sample"
               className="w-full h-full object-cover"
               data-alt="professional male portrait with natural lighting"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWi4QVlq_gsmckVAJnO2XJXGsETUfPYjIuPHfJ5ZXm3tWuGwmFNG25BTbt67in2CS1tXY-Q4ta3A9KXvA9X0FEO89UAx9y-FlUnA9IluUAhE8Grhtna-0JWZKNm5dEcqnwIbpJAU2E0G-r2wjPrrs7Z61TWHf-r2Ejwx3snxNIgmDXTRw9Rshqoo2S1GIrSOJr4_7EaOoTwgyAooXJV5DW2HPIxGbqoGXewE_gGYsLIZaKK3DTtcR81riwJy_KdJoQNsJI1ZaTHA"

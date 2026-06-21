@@ -1,6 +1,7 @@
 import { Project } from '@/app/lib/definitions';
 import { EllipsisVerticalIcon } from '@heroicons/react/20/solid';
 import { Architecture } from '@mui/icons-material';
+import Image from 'next/image';
 export default function ProjectCard({ project }: { project: Project }) {
   return (
     <div className="bg-white rounded-2xl p-6 flex items-center gap-8 shadow-xs hover:shadow-md transition-shadow border-none group">
@@ -37,10 +38,11 @@ export default function ProjectCard({ project }: { project: Project }) {
               key={index}
               className="h-8 w-8 rounded-full border-2 border-white overflow-hidden bg-slate-200"
             >
-              <img
+              <Image
+                alt="team-member"
                 className="w-full h-full object-cover"
                 data-alt="portrait of a young woman professional against a neutral background"
-                src={team_member.image}
+                src={team_member.image || ''}
               />
             </div>
           ))}

@@ -1,5 +1,6 @@
 import { CalendarIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import Image from 'next/image';
 
 interface IdeaCardProps {
   title: string;
@@ -22,7 +23,7 @@ export function IdeaCard({ title, description, tags, status, updatedAt, imageUrl
     <div className="group relative flex flex-col overflow-hidden rounded-xl bg-white transition-all hover:shadow-lg border border-transparent hover:border-gray-100">
       {imageUrl && (
         <div className="aspect-video w-full overflow-hidden">
-          <img
+          <Image
             src={imageUrl}
             alt={title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"

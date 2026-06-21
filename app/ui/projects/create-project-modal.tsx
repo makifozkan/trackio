@@ -101,20 +101,17 @@ export default function CreateProjectModal({
     setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const saveEdit = useCallback(
-    (task: Partial<Task>) => {
-      console.log('Saving task:', task);
-      // Save logic here
-      setTasks((prev) => {
-        const index = prev.findIndex((t) => t.id === task.id);
-        if (index !== -1) {
-          prev[index] = { ...prev[index], ...task };
-        }
-        return [...prev];
-      });
-    },
-    [project]
-  );
+  const saveEdit = useCallback((task: Partial<Task>) => {
+    console.log('Saving task:', task);
+    // Save logic here
+    setTasks((prev) => {
+      const index = prev.findIndex((t) => t.id === task.id);
+      if (index !== -1) {
+        prev[index] = { ...prev[index], ...task };
+      }
+      return [...prev];
+    });
+  }, []);
 
   const calculateWorkingDays = (tasks: Partial<Task>[], sum: number): number => {
     if (tasks.length === 0) {
