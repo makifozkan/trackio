@@ -8,6 +8,7 @@ import {
   RocketLaunchIcon,
   Square3Stack3DIcon,
   QueueListIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -16,6 +17,7 @@ import clsx from 'clsx';
 // Map of links to display in the side navigation.
 const links = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Builder', href: '/builder', icon: Cog6ToothIcon },
   { name: 'Ideas', href: '/dashboard/ideas', icon: LightBulbIcon },
   { name: 'Invoices', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Projects', href: '/dashboard/projects', icon: Square3Stack3DIcon },

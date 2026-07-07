@@ -6,7 +6,11 @@
     "start": "next start",
     "lint": "eslint .",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "generate-schema": "node generate-schema.js",
+    "generate-classes": "node generate-classes.js",
+    "generate-types": "node generate-types.js",
+    "generate": "pnpm generate-schema && pnpm generate-classes && pnpm generate-types"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",
@@ -28,6 +32,7 @@
     "@tiptap/pm": "^3.26.1",
     "@tiptap/react": "^3.26.1",
     "@tiptap/starter-kit": "^3.26.1",
+    "@xyflow/react": "^12.11.2",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

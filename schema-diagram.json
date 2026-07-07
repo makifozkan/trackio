@@ -1,0 +1,105 @@
+{
+  "nodes": [
+    {
+      "id": "user-type",
+      "type": "dataClass",
+      "position": {
+        "x": 103.59243611385676,
+        "y": 118.56091992159338
+      },
+      "data": {
+        "name": "LatestInvoice",
+        "attributes": ["id: string", "name: string"]
+      },
+      "measured": {
+        "width": 180,
+        "height": 100
+      },
+      "selected": true,
+      "dragging": false
+    },
+    {
+      "id": "user-table",
+      "type": "dbTable",
+      "position": {
+        "x": 346.0818737991898,
+        "y": 361.05035760692635
+      },
+      "data": {
+        "tableName": "users",
+        "columns": [
+          {
+            "name": "id",
+            "type": "INT",
+            "isPK": true
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(255)",
+            "isPK": false,
+            "isFK": false
+          }
+        ]
+      },
+      "measured": {
+        "width": 200,
+        "height": 105
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "user-class",
+      "type": "uml",
+      "position": {
+        "x": -238,
+        "y": 146
+      },
+      "data": {
+        "name": "User",
+        "attributes": [
+          "+ id: string",
+          "- email: string",
+          "- passwordHash: string"
+        ],
+        "methods": [
+          "+ validatePassword(pwd: string): boolean",
+          "+ updateEmail(newEmail: string): void"
+        ]
+      },
+      "measured": {
+        "width": 284,
+        "height": 184
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "db-interface",
+      "type": "uml",
+      "position": {
+        "x": 469.1175466166249,
+        "y": 114.98954013637564
+      },
+      "data": {
+        "name": "Repository",
+        "stereotype": "interface",
+        "attributes": ["+ dbConnection: Connection"],
+        "methods": ["+ findById(id: string): User", "+ save(user: User): void"]
+      },
+      "measured": {
+        "width": 205,
+        "height": 155
+      },
+      "selected": false,
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "n1-n2",
+      "source": "n1",
+      "target": "n2"
+    }
+  ]
+}

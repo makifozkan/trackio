@@ -14,11 +14,12 @@ import {
 } from '@mui/icons-material';
 import ProjectTask from './project-task';
 import { Idea, Project, Task } from '@/app/lib/definitions';
-import { useActionState, useCallback, useEffect, useState } from 'react';
+import { useActionState, useCallback, useContext, useEffect, useState } from 'react';
 import { fetchIdeas } from '@/app/lib/ideas-actions';
 import { generateProjectPlan } from '@/app/lib/gemini-actions';
 import { createProject, updateProject } from '@/app/lib/project-actions';
 import { ProjectDetailSkeleton } from '../skeletons';
+import { ProjectPageContext } from '@/app/dashboard/projects/project-page-context';
 
 export default function CreateProjectModal({
   project,
@@ -34,6 +35,12 @@ export default function CreateProjectModal({
   const [projectName, setProjectName] = useState(project?.name || '');
   const [projectDescription, setProjectDescription] = useState(project?.description || '');
   const [selectedIdeaId, setSelectedIdeaId] = useState<string>(project?.source_idea_id || '');
+  const { setLoading } = useContext(ProjectPageContext);
+
+  useEffect(() => {
+    console.log('project loaded');
+    setLoading?.(false);
+  }, [setLoading]);
 
   const handleSubmit = async (formData: FormData) => {
     formData.append(
