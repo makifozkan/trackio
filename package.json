@@ -10,7 +10,8 @@
     "generate-schema": "node generate-schema.js",
     "generate-classes": "node generate-classes.js",
     "generate-types": "node generate-types.js",
-    "generate": "pnpm generate-schema && pnpm generate-classes && pnpm generate-types"
+    "generate-handlers": "node generate-handlers.js",
+    "generate": "pnpm generate-schema && pnpm generate-classes && pnpm generate-types && pnpm generate-handlers"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",

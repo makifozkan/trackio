@@ -1,32 +1,89 @@
 {
   "nodes": [
     {
-      "id": "user-type",
+      "id": "dataclass-node-1783461822830",
       "type": "dataClass",
       "position": {
-        "x": 103.59243611385676,
-        "y": 118.56091992159338
+        "x": -7.58797495232659,
+        "y": 86.6821511205925
       },
       "data": {
-        "name": "LatestInvoice",
-        "attributes": ["id: string", "name: string"]
+        "name": "User",
+        "attributes": [
+          "id: string",
+          "email: string",
+          "firstName: string",
+          "lastName: string",
+          "role: \"admin\" | \"user\"",
+          "isActive: boolean",
+          "createdAt: string"
+        ]
       },
       "measured": {
         "width": 180,
-        "height": 100
+        "height": 210
       },
-      "selected": true,
+      "selected": false,
       "dragging": false
     },
     {
-      "id": "user-table",
-      "type": "dbTable",
+      "id": "dataclass-node-1783461872638",
+      "type": "dataClass",
       "position": {
-        "x": 346.0818737991898,
-        "y": 361.05035760692635
+        "x": 518.9225489716459,
+        "y": 38.5576153876834
       },
       "data": {
-        "tableName": "users",
+        "name": "Invoice",
+        "attributes": [
+          "id: string",
+          "customerId: string",
+          "amount: number",
+          "status: \"paid\" | \"pending\" | \"void\"",
+          "dueDate: string"
+        ]
+      },
+      "measured": {
+        "width": 251,
+        "height": 166
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "dataclass-node-1783461890114",
+      "type": "dataClass",
+      "position": {
+        "x": -233.28803248206964,
+        "y": 100.60483282045485
+      },
+      "data": {
+        "name": "Product",
+        "attributes": [
+          "id: string",
+          "sku: string",
+          "name: string",
+          "price: number",
+          "stock: number",
+          "isActive: boolean"
+        ]
+      },
+      "measured": {
+        "width": 180,
+        "height": 188
+      },
+      "selected": false,
+      "dragging": false
+    },
+    {
+      "id": "db-node-1783462062225",
+      "type": "dbTable",
+      "position": {
+        "x": 251.6416202497499,
+        "y": 311.7833558707463
+      },
+      "data": {
+        "tableName": "User",
         "columns": [
           {
             "name": "id",
@@ -38,58 +95,18 @@
             "type": "VARCHAR(255)",
             "isPK": false,
             "isFK": false
+          },
+          {
+            "name": "firstName",
+            "type": "VARCHAR(255)",
+            "isPK": false,
+            "isFK": false
           }
         ]
       },
       "measured": {
         "width": 200,
-        "height": 105
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "user-class",
-      "type": "uml",
-      "position": {
-        "x": -238,
-        "y": 146
-      },
-      "data": {
-        "name": "User",
-        "attributes": [
-          "+ id: string",
-          "- email: string",
-          "- passwordHash: string"
-        ],
-        "methods": [
-          "+ validatePassword(pwd: string): boolean",
-          "+ updateEmail(newEmail: string): void"
-        ]
-      },
-      "measured": {
-        "width": 284,
-        "height": 184
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "db-interface",
-      "type": "uml",
-      "position": {
-        "x": 469.1175466166249,
-        "y": 114.98954013637564
-      },
-      "data": {
-        "name": "Repository",
-        "stereotype": "interface",
-        "attributes": ["+ dbConnection: Connection"],
-        "methods": ["+ findById(id: string): User", "+ save(user: User): void"]
-      },
-      "measured": {
-        "width": 205,
-        "height": 155
+        "height": 132
       },
       "selected": false,
       "dragging": false

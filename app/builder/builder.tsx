@@ -7,6 +7,7 @@ import UmlNode from './uml-node';
 import Sidebar from './sidebar';
 import DbTableNode from './db-table-node';
 import DataClassNode from './data-class-node';
+import { DATA_CLASS_PRESETS } from './presets';
 
 // 2. Map your custom "uml" node type to the UmlNode React Component.
 // It is important to define this object OUTSIDE of your component to prevent re-renders.
@@ -112,15 +113,24 @@ export default function Builder() {
   };
 
   // --- Add Data Class Handler (New) ---
-  const handleAddDataClassNode = () => {
+  // Accept a template type (defaults to 'blank' if not specified)
+  const handleAddDataClassNode = (presetKey: keyof typeof DATA_CLASS_PRESETS = 'blank') => {
     const id = `dataclass-node-${Date.now()}`;
+    const preset = DATA_CLASS_PRESETS[presetKey];
+
     setNodes((nds) => [
       ...nds,
       {
         id,
         type: 'dataClass',
-        position: { x: 150, y: 150 },
-        data: { name: 'LatestInvoice', attributes: ['id: string', 'name: string'] },
+        position: {
+          x: 100 + Math.random() * 100,
+          y: 100 + Math.random() * 100,
+        },
+        data: {
+          name: preset.name,
+          attributes: [...preset.attributes], // Copy the preset attributes
+        },
       },
     ]);
     setSelectedNodeId(id);
@@ -255,17 +265,13 @@ export default function Builder() {
           fitView
         >
           {/* Floating Action Bar */}
-          <Panel position="top-left" style={{ display: 'flex', gap: '10px' }}>
+          {/* Floating Action Bar */}
+          <Panel
+            position="top-left"
+            style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', maxWidth: '600px' }}
+          >
             <button onClick={handleAddUmlNode} style={{ ...topBtnStyle, background: '#0066cc' }}>
               + Add Class
-            </button>
-
-            {/* Added Teal Data Class Button */}
-            <button
-              onClick={handleAddDataClassNode}
-              style={{ ...topBtnStyle, background: '#008080' }}
-            >
-              + Add Data Class
             </button>
             <button
               onClick={handleAddDbTableNode}
@@ -274,7 +280,32 @@ export default function Builder() {
               + Add DB Table
             </button>
 
-            {/* Added Green Export Button */}
+            {/* --- Data Class Presets --- */}
+            <button
+              onClick={() => handleAddDataClassNode('blank')}
+              style={{ ...topBtnStyle, background: '#008080' }}
+            >
+              + Custom Type
+            </button>
+            <button
+              onClick={() => handleAddDataClassNode('user')}
+              style={{ ...topBtnStyle, background: '#009999' }}
+            >
+              + Add User Preset
+            </button>
+            <button
+              onClick={() => handleAddDataClassNode('product')}
+              style={{ ...topBtnStyle, background: '#009999' }}
+            >
+              + Add Product Preset
+            </button>
+            <button
+              onClick={() => handleAddDataClassNode('invoice')}
+              style={{ ...topBtnStyle, background: '#009999' }}
+            >
+              + Add Invoice Preset
+            </button>
+
             <button onClick={handleExportJson} style={{ ...topBtnStyle, background: '#28a745' }}>
               💾 Export JSON
             </button>
