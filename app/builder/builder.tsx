@@ -578,7 +578,6 @@ export default function Builder() {
   };
 
   const handleAutowireDataClass = (tableNode: AppNode) => {
-    // 1. Safe Type Guard: Enforce that we are starting from a database table node
     if (tableNode.type !== 'dbTable') return;
 
     const { tableName, columns } = tableNode.data;
@@ -586,7 +585,7 @@ export default function Builder() {
 
     const pascalName = toPascalCase(tableName);
 
-    // 2. Map standard database columns to TS types
+    // Standard database columns mapping
     const mappedAttributes = columns.map((col) => {
       let tsType = 'string';
       const type = col.type.toUpperCase();
@@ -608,21 +607,34 @@ export default function Builder() {
       return `${col.name}${optionalFlag}: ${tsType}`;
     });
 
-    // =========================================================================
-    // 3. SCAN RELATIONSHIPS (EDGES) WITH ROBUST LABEL FALLBACKS
-    // =========================================================================
+    // ==========================================
+    // RELATIONAL COMPILER LAYER
+    // ==========================================
     const relationalAttributes: string[] = [];
 
+    // Helper: Identify if a node on the canvas is a Junction Table
+    const isJunctionTable = (node: AppNode) => {
+      if (node.type !== 'dbTable') return false;
+      const cols = node.data.columns || [];
+      const fks = cols.filter((c) => c.isFK);
+      const pks = cols.filter((c) => c.isPK);
+      // Junction tables must have at least 2 composite PK/FK keys
+      return fks.length >= 2 && pks.length >= 2 && fks.every((c) => c.isPK);
+    };
+
+    // -------------------------------------------------------------
+    // RULE 1: Standard 1:1 and 1:N Relationships (Skips Junction Lines)
+    // -------------------------------------------------------------
     edges.forEach((edge) => {
-      // SMART FALLBACK: If edge.data is missing, evaluate visual label string to support pre-existing edges
       const relation = edge.data?.relationType;
 
-      // A. Outgoing Relationship (Current table is Parent / Source)
+      // 1. Outgoing relationship
       if (edge.source === tableNode.id) {
         const targetNode = nodes.find((n) => n.id === edge.target);
-        if (targetNode && targetNode.type === 'dbTable') {
+        // Ensure the target is a valid DB Table and NOT an intermediate junction table
+        if (targetNode && targetNode.type === 'dbTable' && !isJunctionTable(targetNode)) {
           const childTableName = targetNode.data.tableName;
-          const childPascalName = toPascalCase(childTableName); // e.g. "Products"
+          const childPascalName = toPascalCase(childTableName);
 
           if (relation === 'one-to-many') {
             const childPropertyPlural = getPluralName(childPascalName).toLowerCase();
@@ -634,12 +646,13 @@ export default function Builder() {
         }
       }
 
-      // B. Incoming Relationship (Current table is Child / Target)
+      // 2. Incoming relationship
       if (edge.target === tableNode.id) {
         const sourceNode = nodes.find((n) => n.id === edge.source);
-        if (sourceNode && sourceNode.type === 'dbTable') {
+        // Ensure source is a valid DB Table and NOT an intermediate junction table
+        if (sourceNode && sourceNode.type === 'dbTable' && !isJunctionTable(sourceNode)) {
           const parentTableName = sourceNode.data.tableName;
-          const parentPascalName = toPascalCase(parentTableName); // e.g. "UsersV2"
+          const parentPascalName = toPascalCase(parentTableName);
 
           const parentPropertySingular = getSingularName(parentPascalName).toLowerCase();
           relationalAttributes.push(`${parentPropertySingular}?: ${parentPascalName}`);
@@ -647,12 +660,64 @@ export default function Builder() {
       }
     });
 
+    // -------------------------------------------------------------
+    // RULE 2: Many-to-Many Relationships (Scans through Junction tables)
+    // -------------------------------------------------------------
+    nodes.forEach((node) => {
+      if (node.type === 'dbTable' && node.id !== tableNode.id && isJunctionTable(node)) {
+        const cols = node.data.columns || [];
+        const fks = cols.filter((c) => c.isFK);
+
+        // Check if this junction table has a foreign key referencing our current table
+        const hasRefToMe = fks.some(
+          (col) =>
+            col.name.replace(/_id$/, '') === getSingularName(tableName) ||
+            col.name.replace(/_id$/, '') === tableName
+        );
+
+        if (hasRefToMe) {
+          // Find the OTHER foreign key in this junction table pointing to the second parent
+          const otherFk = fks.find(
+            (col) =>
+              col.name.replace(/_id$/, '') !== getSingularName(tableName) &&
+              col.name.replace(/_id$/, '') !== tableName
+          );
+
+          if (otherFk) {
+            const otherSingularName = otherFk.name.replace(/_id$/, '');
+            let otherTableNamePlural = `${otherSingularName}s`;
+
+            if (otherSingularName.endsWith('y')) {
+              otherTableNamePlural = `${otherSingularName.slice(0, -1)}ies`;
+            } else if (otherSingularName === 'user_v2') {
+              otherTableNamePlural = 'users_v2'; // Maps custom schema naming back
+            }
+
+            // Find the targeted node on the canvas to resolve its exact name casing
+            const otherNode = nodes.find(
+              (n) =>
+                n.type === 'dbTable' &&
+                n.data.tableName.toLowerCase() === otherTableNamePlural.toLowerCase()
+            );
+
+            if (otherNode && otherNode.type === 'dbTable') {
+              const otherPascalName = toPascalCase(otherNode.data.tableName);
+              const pluralProp = getPluralName(otherPascalName).toLowerCase();
+
+              // Map direct clean relationship bypassing join table!
+              relationalAttributes.push(`${pluralProp}?: ${otherPascalName}[]`);
+            }
+          }
+        }
+      }
+    });
+
     const id = `dataclass-node-${Date.now()}`;
 
-    // Combine standard properties with relations
+    // Combine standard properties and relation attributes (No visual blank spaces)
     const finalAttributes = [...mappedAttributes, ...relationalAttributes];
 
-    // 4. Create the final strongly-typed Data Class Node
+    // Spawns the finalized Data Class card
     const newDataClassNode: AppNode = {
       id,
       type: 'dataClass',
