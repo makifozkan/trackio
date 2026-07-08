@@ -133,9 +133,13 @@ export async function update${pascalName}(${pkArgs}, data: Partial<Omit<${pascal
       return (await fetch${pascalName}ById(${pks.map((pk) => pk.name).join(', ')}))!;
     }
 
+    const allowedKeys = [${updateFieldsList}];
+    const keysToUpdate = allowedKeys.filter((key) => (data as any)[key] !== undefined);
+    const updateColumns = sql(data, ...(keysToUpdate as any[])) as any;
+
     const result = await sql<${pascalName}[]>\`
       UPDATE ${tableName}
-      SET \${sql(data, ...([${updateFieldsList}] as any[]))}
+      SET \${updateColumns}
       WHERE ${pkWhereClause}
       RETURNING ${columnNamesList}
     \`;

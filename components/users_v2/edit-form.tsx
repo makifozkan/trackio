@@ -24,7 +24,7 @@ export function EditUsersV2Form({ record }: { record: UsersV2 }) {
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4" encType="multipart/form-data">
+    <form action={formAction} className="space-y-4 pt-4">
       <DialogClose ref={closeRef} className="hidden" />
 
       {state?.message && !state.success && (

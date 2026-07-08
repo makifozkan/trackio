@@ -125,7 +125,7 @@ export function Create${pascalName}Form() {
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4" ${hasImages ? 'encType="multipart/form-data"' : ''}>
+    <form action={formAction} className="space-y-4 pt-4">
       {/* Hidden Radix-UI Close controller */}
       <DialogClose ref={closeRef} className="hidden" />
 
@@ -209,7 +209,7 @@ export function Edit${pascalName}Form({ record }: { record: ${pascalName} }) {
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4" ${hasImages ? 'encType="multipart/form-data"' : ''}>
+    <form action={formAction} className="space-y-4 pt-4">
       <DialogClose ref={closeRef} className="hidden" />
 
       {state?.message && !state.success && (

@@ -23,7 +23,7 @@ export function CreateUsersV2Form() {
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4" encType="multipart/form-data">
+    <form action={formAction} className="space-y-4 pt-4">
       {/* Hidden Radix-UI Close controller */}
       <DialogClose ref={closeRef} className="hidden" />
 

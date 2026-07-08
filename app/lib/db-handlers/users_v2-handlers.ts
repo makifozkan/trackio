@@ -61,9 +61,13 @@ export async function updateUsersV2(id: any, data: Partial<Omit<UsersV2, 'id'>>)
       return (await fetchUsersV2ById(id))!;
     }
 
+    const allowedKeys = ['name', 'email', 'image'];
+    const keysToUpdate = allowedKeys.filter((key) => (data as any)[key] !== undefined);
+    const updateColumns = sql(data, ...(keysToUpdate as any[])) as any;
+
     const result = await sql<UsersV2[]>`
       UPDATE users_v2
-      SET ${sql(data, ...(['name', 'email', 'image'] as any[]))}
+      SET ${updateColumns}
       WHERE id = ${id}
       RETURNING id, name, email, image, created_at
     `;
