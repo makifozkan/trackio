@@ -49,19 +49,26 @@ function generateHandlers() {
     const pks = columns.filter((col) => col.isPK);
     const nonPks = columns.filter((col) => !col.isPK);
 
+    // =========================================================================
+    // SMART FILTER: Exclude SERIAL and fields with Defaults from INSERT payload
+    // =========================================================================
+    const insertColumns = columns.filter((col) => {
+      const isAutoId = col.type.toUpperCase() === 'SERIAL';
+      const hasDefault = col.defaultValue && col.defaultValue.trim() !== '';
+      return !col.isPK && !isAutoId && !hasDefault;
+    });
+
     // Build PK query args and WHERE clause strings (Supports Composite Keys)
     const pkArgs = pks.map((pk) => `${pk.name}: any`).join(', ');
     const pkWhereClause = pks.map((pk) => `${pk.name} = \${${pk.name}}`).join(' AND ');
 
-    // Column lists for Select, Insert, and dynamic updates
+    // Column lists for Select, Insert, and updates
     const columnNamesList = columns.map((col) => col.name).join(', ');
-    const nonPkNamesList = nonPks.map((col) => col.name).join(', ');
-    const nonPkValuesList = nonPks.map((col) => `\${data.${col.name}}`).join(', ');
-
-    // ==========================================
-    // NEW: List of non-primary keys to update dynamically
-    // ==========================================
     const updateFieldsList = nonPks.map((col) => `'${col.name}'`).join(', ');
+
+    // Uses insertColumns and safe '?? null' defaults for the INSERT statement
+    const nonPkNamesList = insertColumns.map((col) => col.name).join(', ');
+    const nonPkValuesList = insertColumns.map((col) => `\${data.${col.name} ?? null}`).join(', ');
 
     const fileContent = `import { sql } from '../db';
 import { ${pascalName} } from '../types/${pascalName}'; // Import central type from generate-types.js

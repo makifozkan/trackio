@@ -40,8 +40,8 @@ export async function fetchUsersV2ById(id: any): Promise<UsersV2 | null> {
 export async function createUsersV2(data: Omit<UsersV2, 'id'>): Promise<UsersV2> {
   try {
     const result = await sql<UsersV2[]>`
-      INSERT INTO users_v2 (name, email, image, created_at)
-      VALUES (${data.name}, ${data.email}, ${data.image}, ${data.created_at})
+      INSERT INTO users_v2 (name, email, image)
+      VALUES (${data.name ?? null}, ${data.email ?? null}, ${data.image ?? null})
       RETURNING id, name, email, image, created_at
     `;
     return result[0];

@@ -15,7 +15,7 @@ export type ActionState = {
  * CREATE ACTION
  */
 export async function createUsersV2Action(
-  prevState: ActionState,
+  prevState: ActionState, 
   formData: FormData
 ): Promise<ActionState> {
   // 1. Convert form inputs to structured JSON object
@@ -57,7 +57,7 @@ export async function createUsersV2Action(
  */
 export async function updateUsersV2Action(
   id: any,
-  prevState: ActionState,
+  prevState: ActionState, 
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = Object.fromEntries(formData.entries());

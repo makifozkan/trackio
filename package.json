@@ -13,7 +13,8 @@
     "generate-handlers": "node generate-handlers.js",
     "generate-validations": "node generate-validations.js",
     "generate-actions": "node generate-actions.js",
-    "generate": "pnpm generate-schema && pnpm generate-classes && pnpm generate-types && pnpm generate-validations && pnpm generate-handlers && pnpm generate-actions"
+    "generate-views": "node generate-views.js",
+    "generate": "pnpm generate-schema && pnpm generate-classes && pnpm generate-types && pnpm generate-validations && pnpm generate-handlers && pnpm generate-actions && pnpm generate-views"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",
