@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const jsonFilePath = path.join(__dirname, 'schema-diagram.json');
-const outputDir = path.join(__dirname, 'lib', 'validation'); // Saves to lib/validation/
+const outputDir = path.join(__dirname, 'app', 'lib', 'validation'); // Saves to lib/validation/
 
 function generateValidation() {
   if (!fs.existsSync(jsonFilePath)) {

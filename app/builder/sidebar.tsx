@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react'; // Updated to import state/callback hooks
 
 interface SidebarProps {
   node: any;
@@ -18,24 +18,56 @@ export default function Sidebar({
   onAutowireZodSchema,
 }: SidebarProps) {
   const isUml = node.type === 'uml';
-  const isDataClass = node.type === 'dataClass'; // Added check
-  const isDbTable = node.type === 'dbTable'; // Added check
+  const isDataClass = node.type === 'dataClass';
+  const isDbTable = node.type === 'dbTable';
   const isZod = node.type === 'zodSchema';
   const data = node.data;
 
+  // 1. Add Dynamic Width State (Default 320px)
+  const [width, setWidth] = useState(320);
+
+  // 2. Add Draggable Resize Handler
+  const startResizing = useCallback(
+    (mouseDownEvent: React.MouseEvent) => {
+      mouseDownEvent.preventDefault();
+
+      const startWidth = width;
+      const startX = mouseDownEvent.clientX;
+
+      const doDrag = (mouseMoveEvent: MouseEvent) => {
+        // Moves left (negative deltaX) -> Increases sidebar width
+        const deltaX = mouseMoveEvent.clientX - startX;
+
+        // Clamp width between 250px (minimum) and 800px (maximum)
+        const newWidth = Math.max(250, Math.min(800, startWidth - deltaX));
+        setWidth(newWidth);
+      };
+
+      const stopDrag = () => {
+        document.removeEventListener('mousemove', doDrag);
+        document.removeEventListener('mouseup', stopDrag);
+      };
+
+      document.addEventListener('mousemove', doDrag);
+      document.addEventListener('mouseup', stopDrag);
+    },
+    [width]
+  );
+
   // --- Styles ---
   const sidebarStyle: React.CSSProperties = {
-    width: '320px',
+    width: `${width}px`, // 3. Updated to use dynamic state width
     height: '100%',
     background: '#fff',
     borderLeft: '1px solid #ccc',
-    padding: '20px',
+    padding: '20px 20px 20px 25px', // Added extra 5px left padding for spacing around handle
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
     overflowY: 'auto',
     fontFamily: 'sans-serif',
+    position: 'relative', // 4. Required to place the absolute resize handle
   };
 
   const inputStyle: React.CSSProperties = {
@@ -183,6 +215,26 @@ export default function Sidebar({
 
   return (
     <div style={sidebarStyle}>
+      {/* 
+        5. RESIZER HANDLE ELEMENT (Absolute positioned on far-left border)
+      */}
+      <div
+        onMouseDown={startResizing}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: '6px',
+          height: '100%',
+          cursor: 'ew-resize',
+          backgroundColor: 'transparent',
+          transition: 'background-color 0.15s',
+          zIndex: 100, // Kept high to ensure it floats over internal scrollable panels
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0066cc')} // Highlights blue when hovered
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+      />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3 style={{ margin: 0 }}>
           {isUml && 'UML Class Properties'}

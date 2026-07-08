@@ -1,114 +1,120 @@
 {
   "nodes": [
     {
-      "id": "dataclass-node-1783461822830",
-      "type": "dataClass",
+      "id": "db-node-1783497342198",
+      "type": "dbTable",
       "position": {
-        "x": -7.58797495232659,
-        "y": 86.6821511205925
+        "x": 186.52857272969595,
+        "y": 139.00526531483348
       },
       "data": {
-        "name": "User",
+        "tableName": "users_v2",
+        "columns": [
+          {
+            "name": "id",
+            "type": "UUID",
+            "isPK": true,
+            "defaultValue": "uuid_generate_v4()"
+          },
+          {
+            "name": "name",
+            "type": "VARCHAR(255)",
+            "isNotNull": true
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(255)",
+            "isNotNull": true
+          },
+          {
+            "name": "image",
+            "type": "TEXT"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMPTZ",
+            "isNotNull": true,
+            "defaultValue": "now()"
+          }
+        ]
+      },
+      "measured": {
+        "width": 200,
+        "height": 186
+      },
+      "selected": false
+    },
+    {
+      "id": "dataclass-node-1783497343867",
+      "type": "dataClass",
+      "position": {
+        "x": 420.02857272969595,
+        "y": 160.00526531483348
+      },
+      "data": {
+        "name": "UsersV2",
         "attributes": [
           "id: string",
+          "name: string",
           "email: string",
-          "firstName: string",
-          "lastName: string",
-          "role: \"admin\" | \"user\"",
-          "isActive: boolean",
-          "createdAt: string"
+          "image: string",
+          "created_at: string"
         ]
       },
       "measured": {
         "width": 180,
-        "height": 210
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "dataclass-node-1783461872638",
-      "type": "dataClass",
-      "position": {
-        "x": 518.9225489716459,
-        "y": 38.5576153876834
-      },
-      "data": {
-        "name": "Invoice",
-        "attributes": [
-          "id: string",
-          "customerId: string",
-          "amount: number",
-          "status: \"paid\" | \"pending\" | \"void\"",
-          "dueDate: string"
-        ]
-      },
-      "measured": {
-        "width": 251,
         "height": 166
       },
       "selected": false,
       "dragging": false
     },
     {
-      "id": "dataclass-node-1783461890114",
-      "type": "dataClass",
+      "id": "zod-node-1783497345693",
+      "type": "zodSchema",
       "position": {
-        "x": -233.28803248206964,
-        "y": 100.60483282045485
+        "x": 106.42708183290534,
+        "y": -141.37725957565823
       },
       "data": {
-        "name": "Product",
-        "attributes": [
-          "id: string",
-          "sku: string",
-          "name: string",
-          "price: number",
-          "stock: number",
-          "isActive: boolean"
-        ]
-      },
-      "measured": {
-        "width": 180,
-        "height": 188
-      },
-      "selected": false,
-      "dragging": false
-    },
-    {
-      "id": "db-node-1783462062225",
-      "type": "dbTable",
-      "position": {
-        "x": 251.6416202497499,
-        "y": 311.7833558707463
-      },
-      "data": {
-        "tableName": "User",
-        "columns": [
+        "name": "UsersV2Schema",
+        "fields": [
           {
             "name": "id",
-            "type": "INT",
-            "isPK": true
+            "validation": "z.string().optional()"
+          },
+          {
+            "name": "name",
+            "validation": "z.string({ required_error: 'name is required.' })"
           },
           {
             "name": "email",
-            "type": "VARCHAR(255)",
-            "isPK": false,
-            "isFK": false
+            "validation": "z.string({ required_error: 'Please enter your email.' }).email({ message: 'Invalid email address.' })"
           },
           {
-            "name": "firstName",
-            "type": "VARCHAR(255)",
-            "isPK": false,
-            "isFK": false
+            "name": "image",
+            "validation": "z.string().nullable().optional()"
+          },
+          {
+            "name": "created_at",
+            "validation": "z.string().optional()"
+          }
+        ],
+        "operations": [
+          {
+            "name": "CreateUsersV2",
+            "omitFields": ["id", "created_at"]
+          },
+          {
+            "name": "UpdateUsersV2",
+            "omitFields": ["id"]
           }
         ]
       },
       "measured": {
-        "width": 200,
-        "height": 132
+        "width": 673,
+        "height": 247
       },
-      "selected": false,
+      "selected": true,
       "dragging": false
     }
   ],
@@ -116,7 +122,11 @@
     {
       "id": "n1-n2",
       "source": "n1",
-      "target": "n2"
+      "target": "n2",
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#333"
+      }
     }
   ]
 }

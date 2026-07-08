@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const jsonFilePath = path.join(__dirname, 'schema-diagram.json');
-const outputDir = path.join(__dirname, 'app', 'lib', 'db-handlers');
+const outputDir = path.join(__dirname, 'app', 'lib', 'db-handlers'); // Saves to lib/db-handlers/
 
 function toPascalCase(str) {
   return str
@@ -50,25 +50,19 @@ function generateHandlers() {
     const nonPks = columns.filter((col) => !col.isPK);
 
     // Build PK query args and WHERE clause strings (Supports Composite Keys)
-    const pkArgs = pks.map((pk) => `${pk.name}: any`).join(', '); // Types are handled by the imported interface
+    const pkArgs = pks.map((pk) => `${pk.name}: any`).join(', ');
     const pkWhereClause = pks.map((pk) => `${pk.name} = \${${pk.name}}`).join(' AND ');
 
-    // Column lists for Select and Insert
+    // Column lists for Select, Insert, and dynamic updates
     const columnNamesList = columns.map((col) => col.name).join(', ');
     const nonPkNamesList = nonPks.map((col) => col.name).join(', ');
     const nonPkValuesList = nonPks.map((col) => `\${data.${col.name}}`).join(', ');
 
-    // Build Update assignments
-    const updateAssignments = nonPks
-      .map(
-        (col) =>
-          `      ${col.name} = \${data.${col.name} !== undefined ? data.${col.name} : sql\`\${${col.name}}\`}`
-      )
-      .join(',\n');
+    // ==========================================
+    // NEW: List of non-primary keys to update dynamically
+    // ==========================================
+    const updateFieldsList = nonPks.map((col) => `'${col.name}'`).join(', ');
 
-    // ==========================================
-    // UPDATED TEMPLATE: Import types from lib/types/
-    // ==========================================
     const fileContent = `import { sql } from '../db';
 import { ${pascalName} } from '../types/${pascalName}'; // Import central type from generate-types.js
 
@@ -127,10 +121,14 @@ export async function create${pascalName}(data: Omit<${pascalName}, ${pks.map((p
  */
 export async function update${pascalName}(${pkArgs}, data: Partial<Omit<${pascalName}, ${pks.map((pk) => `'${pk.name}'`).join(' | ')}>>): Promise<${pascalName}> {
   try {
+    // If the payload is empty, skip database execution and return the current record
+    if (Object.keys(data).length === 0) {
+      return (await fetch${pascalName}ById(${pks.map((pk) => pk.name).join(', ')}))!;
+    }
+
     const result = await sql<${pascalName}[]>\`
       UPDATE ${tableName}
-      SET
-${updateAssignments}
+      SET \${sql(data, ...([${updateFieldsList}] as any[]))}
       WHERE ${pkWhereClause}
       RETURNING ${columnNamesList}
     \`;
