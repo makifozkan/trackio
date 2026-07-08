@@ -195,89 +195,87 @@ export default function Sidebar({
       </div>
 
       {/* RENDER FOR UML CLASS OR DATA CLASS */}
-      {isUml ||
-        (isDataClass && (
-          <>
-            <div>
-              <label
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 'bold',
-                  display: 'block',
-                  marginBottom: '4px',
-                }}
-              >
-                {isUml ? 'Class Name' : 'Type Name'}
-              </label>
-              <input style={inputStyle} value={data.name} onChange={handleNameChange} />
-            </div>
+      {(isUml || isDataClass) && (
+        <>
+          <div>
+            <label
+              style={{
+                fontSize: '11px',
+                fontWeight: 'bold',
+                display: 'block',
+                marginBottom: '4px',
+              }}
+            >
+              {isUml ? 'Class Name' : 'Type Name'}
+            </label>
+            <input style={inputStyle} value={data.name} onChange={handleNameChange} />
+          </div>
 
-            <div>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '8px',
-                }}
-              >
-                <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Properties</label>
-                <button onClick={addAttribute} style={btnStyle}>
-                  + Add Field
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '8px',
+              }}
+            >
+              <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Properties</label>
+              <button onClick={addAttribute} style={btnStyle}>
+                + Add Field
+              </button>
+            </div>
+            {data.attributes.map((attr: string, index: number) => (
+              <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                <input
+                  style={inputStyle}
+                  value={attr}
+                  onChange={(e) => handleAttributeChange(index, e.target.value)}
+                />
+                <button
+                  onClick={() => deleteAttribute(index)}
+                  style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
+                >
+                  X
                 </button>
               </div>
-              {data.attributes.map((attr: string, index: number) => (
-                <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                  <input
-                    style={inputStyle}
-                    value={attr}
-                    onChange={(e) => handleAttributeChange(index, e.target.value)}
-                  />
-                  <button
-                    onClick={() => deleteAttribute(index)}
-                    style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
-                  >
-                    X
-                  </button>
-                </div>
-              ))}
-            </div>
+            ))}
+          </div>
+        </>
+      )}
 
-            {/* Render methods ONLY for UML Class */}
-            {isUml && (
-              <div>
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '8px',
-                  }}
-                >
-                  <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Methods</label>
-                  <button onClick={addMethod} style={btnStyle}>
-                    + Add Method
-                  </button>
-                </div>
-                {(data.methods || []).map((method: string, index: number) => (
-                  <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                    <input
-                      style={inputStyle}
-                      value={method}
-                      onChange={(e) => handleMethodChange(index, e.target.value)}
-                    />
-                    <button
-                      onClick={() => deleteMethod(index)}
-                      style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
-                    >
-                      X
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        ))}
+      {isUml && (
+        <div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '8px',
+            }}
+          >
+            <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Methods</label>
+            <button onClick={addMethod} style={btnStyle}>
+              + Add Method
+            </button>
+          </div>
+          {(data.methods || []).map((method: string, index: number) => (
+            <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+              <input
+                style={inputStyle}
+                value={method}
+                onChange={(e) => handleMethodChange(index, e.target.value)}
+              />
+              <button
+                onClick={() => deleteMethod(index)}
+                style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
+              >
+                X
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {isDbTable && (
         /* RENDER FOR DB TABLE */
