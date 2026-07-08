@@ -3,11 +3,9 @@ const path = require('path');
 
 const jsonFilePath = path.join(__dirname, 'schema-diagram.json');
 
-// Define targets relative to project root
 const componentsBaseDir = path.join(__dirname, 'components');
 const appDashboardBaseDir = path.join(__dirname, 'app', 'dashboard');
 
-// Helper to convert to PascalCase
 function toPascalCase(str) {
   return str
     .replace(/[-_]+/g, ' ')
@@ -16,28 +14,29 @@ function toPascalCase(str) {
     .replace(/\w/, (s) => s.toUpperCase());
 }
 
-// Helper to map SQL types to HTML input types
-function getHtmlInputType(sqlType) {
-  const type = sqlType.toUpperCase();
+function getHtmlInputProps(col) {
+  const nameLower = col.name.toLowerCase();
+  if (nameLower.includes('image') || nameLower.includes('avatar')) {
+    return 'type="file" accept="image/*"';
+  }
+  const type = col.type.toUpperCase();
   if (
     type.includes('INT') ||
     type.includes('DECIMAL') ||
     type.includes('BIGINT') ||
     type === 'SERIAL'
   ) {
-    return 'number';
+    return 'type="number" placeholder="Enter number"';
   }
-  return 'text';
+  return `type="text" placeholder="Enter ${col.name}"`;
 }
 
 function generateViews() {
-  // 1. Verify schema diagram file exists
   if (!fs.existsSync(jsonFilePath)) {
-    console.error(`❌ Error: Could not find "schema-diagram.json" in your project root.`);
+    console.error(`❌ Error: Could not find "schema-diagram.json".`);
     return;
   }
 
-  // 2. Read and parse diagram JSON
   const rawData = fs.readFileSync(jsonFilePath, 'utf8');
   let diagramData;
   try {
@@ -48,12 +47,8 @@ function generateViews() {
   }
 
   const { nodes } = diagramData;
-  if (!nodes) {
-    console.error('❌ Invalid JSON: "nodes" property is missing.');
-    return;
-  }
+  if (!nodes) return;
 
-  // 3. Filter out DB Table nodes
   const dbTableNodes = nodes.filter((node) => node.type === 'dbTable');
 
   if (dbTableNodes.length === 0) {
@@ -61,15 +56,12 @@ function generateViews() {
     return;
   }
 
-  // 4. Generate views for each table
   dbTableNodes.forEach((node) => {
     const { tableName, columns } = node.data;
     if (!tableName || !columns) return;
 
     const pascalName = toPascalCase(tableName);
     const pks = columns.filter((col) => col.isPK);
-
-    // Non-PK and non-auto generated columns for form inputs
     const inputCols = columns.filter(
       (col) =>
         !col.isPK &&
@@ -77,7 +69,10 @@ function generateViews() {
         col.type.toUpperCase() !== 'SERIAL'
     );
 
-    // Create target folders
+    const hasImages = inputCols.some(
+      (col) => col.name.toLowerCase().includes('image') || col.name.toLowerCase().includes('avatar')
+    );
+
     const compDir = path.join(componentsBaseDir, tableName);
     const pageDir = path.join(appDashboardBaseDir, tableName);
 
@@ -85,14 +80,19 @@ function generateViews() {
     fs.mkdirSync(pageDir, { recursive: true });
 
     // ==========================================
-    // A. GENERATE CREATE-FORM.TSX (Client Component)
+    // 1. GENERATE CREATE-FORM.TSX (Self-Closing)
     // ==========================================
     const createFormFields = inputCols
       .map((col) => {
-        const type = getHtmlInputType(col.type);
+        const isFile =
+          col.name.toLowerCase().includes('image') || col.name.toLowerCase().includes('avatar');
+        const inputLine = isFile
+          ? `<Input id="${col.name}" name="${col.name}" type="file" accept="image/*" />`
+          : `<Input id="${col.name}" name="${col.name}" ${getHtmlInputProps(col)} />`;
+
         return `        <div className="space-y-2">
           <Label htmlFor="${col.name}">${col.name.replace(/_/g, ' ').toUpperCase()}</Label>
-          <Input id="${col.name}" name="${col.name}" type="${type}" placeholder="Enter ${col.name}" />
+          ${inputLine}
           {state?.errors?.${col.name} && (
             <p className="text-xs text-destructive">{state.errors.${col.name}[0]}</p>
           )}
@@ -102,18 +102,22 @@ function generateViews() {
 
     const createFormContent = `'use client';
 
-import React, { useActionState } from 'react';
+import React, { useActionState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DialogClose } from '@/components/ui/dialog'; // Import DialogClose to close internally
 import { create${pascalName}Action, ActionState } from '@/app/lib/actions/${tableName}-actions';
 
-export function Create${pascalName}Form({ onSuccess }: { onSuccess?: () => void }) {
+export function Create${pascalName}Form() {
+  const closeRef = useRef<HTMLButtonElement>(null);
+
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prevState, formData) => {
       const res = await create${pascalName}Action(prevState, formData);
-      if (res.success && onSuccess) {
-        onSuccess();
+      // If server action succeeded, programmatically click the hidden DialogClose button
+      if (res.success) {
+        closeRef.current?.click();
       }
       return res;
     },
@@ -121,7 +125,10 @@ export function Create${pascalName}Form({ onSuccess }: { onSuccess?: () => void 
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4">
+    <form action={formAction} className="space-y-4 pt-4" ${hasImages ? 'encType="multipart/form-data"' : ''}>
+      {/* Hidden Radix-UI Close controller */}
+      <DialogClose ref={closeRef} className="hidden" />
+
       {state?.message && !state.success && (
         <div className="p-3 bg-destructive/15 text-destructive rounded-md text-sm">{state.message}</div>
       )}
@@ -137,17 +144,34 @@ ${createFormFields}
 `;
 
     // ==========================================
-    // B. GENERATE EDIT-FORM.TSX (Client Component)
+    // 2. GENERATE EDIT-FORM.TSX (Self-Closing)
     // ==========================================
     const editFormFields = inputCols
       .map((col) => {
-        const type = getHtmlInputType(col.type);
+        const isFile =
+          col.name.toLowerCase().includes('image') || col.name.toLowerCase().includes('avatar');
+
+        if (isFile) {
+          return `        <div className="space-y-2">
+          <Label htmlFor="${col.name}">${col.name.replace(/_/g, ' ').toUpperCase()}</Label>
+          {record.${col.name} && (
+            <div className="mb-2">
+              <img src={String(record.${col.name})} alt="Preview" className="h-16 w-16 object-cover rounded-md border" />
+            </div>
+          )}
+          <Input id="${col.name}" name="${col.name}" type="file" accept="image/*" />
+          {state?.errors?.${col.name} && (
+            <p className="text-xs text-destructive">{state.errors.${col.name}[0]}</p>
+          )}
+        </div>`;
+        }
+
         return `        <div className="space-y-2">
           <Label htmlFor="${col.name}">${col.name.replace(/_/g, ' ').toUpperCase()}</Label>
           <Input 
             id="${col.name}" 
             name="${col.name}" 
-            type="${type}" 
+            type="${getHtmlInputProps(col).includes('number') ? 'number' : 'text'}" 
             defaultValue={record.${col.name} !== undefined ? String(record.${col.name}) : ''} 
           />
           {state?.errors?.${col.name} && (
@@ -161,21 +185,23 @@ ${createFormFields}
 
     const editFormContent = `'use client';
 
-import React, { useActionState } from 'react';
+import React, { useActionState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DialogClose } from '@/components/ui/dialog';
 import { update${pascalName}Action, ActionState } from '@/app/lib/actions/${tableName}-actions';
 import { ${pascalName} } from '@/app/lib/types/${pascalName}';
 
-export function Edit${pascalName}Form({ record, onSuccess }: { record: ${pascalName}; onSuccess?: () => void }) {
+export function Edit${pascalName}Form({ record }: { record: ${pascalName} }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
   const updateWithKeys = update${pascalName}Action.bind(null, ${pkBindString});
 
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prevState, formData) => {
       const res = await updateWithKeys(prevState, formData);
-      if (res.success && onSuccess) {
-        onSuccess();
+      if (res.success) {
+        closeRef.current?.click();
       }
       return res;
     },
@@ -183,7 +209,9 @@ export function Edit${pascalName}Form({ record, onSuccess }: { record: ${pascalN
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4">
+    <form action={formAction} className="space-y-4 pt-4" ${hasImages ? 'encType="multipart/form-data"' : ''}>
+      <DialogClose ref={closeRef} className="hidden" />
+
       {state?.message && !state.success && (
         <div className="p-3 bg-destructive/15 text-destructive rounded-md text-sm">{state.message}</div>
       )}
@@ -199,7 +227,7 @@ ${editFormFields}
 `;
 
     // ==========================================
-    // C. GENERATE DELETE-DIALOG.TSX (Client Component)
+    // 3. GENERATE DELETE-DIALOG.TSX (No Changes Needed)
     // ==========================================
     const deleteDialogContent = `'use client';
 
@@ -251,7 +279,7 @@ export default function Delete${pascalName}Button({ ${pks.map((pk) => pk.name).j
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this record from the &quot;${tableName}&quot; table.
+            This action cannot be undone. This will permanently delete this record from the "${tableName}" table.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -271,7 +299,7 @@ export default function Delete${pascalName}Button({ ${pks.map((pk) => pk.name).j
 `;
 
     // ==========================================
-    // D. GENERATE PAGE.TSX (Server Component)
+    // 4. GENERATE PAGE.TSX (Standard clean modal wrappers!)
     // ==========================================
     const tableHeaderCells = columns
       .map(
@@ -279,9 +307,24 @@ export default function Delete${pascalName}Button({ ${pks.map((pk) => pk.name).j
           `                <TableHead>${col.name.replace(/_/g, ' ').toUpperCase()}</TableHead>`
       )
       .join('\n');
+
     const tableBodyCells = columns
-      .map((col) => `                  <TableCell>{String(item.${col.name})}</TableCell>`)
+      .map((col) => {
+        const isImg =
+          col.name.toLowerCase().includes('image') || col.name.toLowerCase().includes('avatar');
+        if (isImg) {
+          return `                  <TableCell>
+                    {item.${col.name} ? (
+                      <img src={String(item.${col.name})} alt="Thumbnail" className="h-10 w-10 object-cover rounded border" />
+                    ) : (
+                      <span className="text-muted-foreground text-xs">No image</span>
+                    )}
+                  </TableCell>`;
+        }
+        return `                  <TableCell>{String(item.${col.name})}</TableCell>`;
+      })
       .join('\n');
+
     const pkPassString = pks.map((pk) => `${pk.name}={item.${pk.name}}`).join(' ');
 
     const pageContent = `import React from 'react';
@@ -294,8 +337,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -316,7 +359,7 @@ export default async function ${pascalName}Page() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Manage ${pascalName}</CardTitle>
           
-          {/* Create Modal Dialog */}
+          {/* Uncontrolled Create Dialog - Closes internally via <DialogClose> */}
           <Dialog>
             <DialogTrigger asChild>
               <Button>+ Create New</Button>
@@ -352,7 +395,7 @@ ${tableBodyCells}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2 items-center">
                         
-                        {/* Edit Modal Dialog */}
+                        {/* Uncontrolled Edit Dialog - Closes internally via <DialogClose> */}
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
@@ -367,7 +410,6 @@ ${tableBodyCells}
                           </DialogContent>
                         </Dialog>
 
-                        {/* Delete Action Trigger */}
                         <Delete${pascalName}Button ${pkPassString} />
                       </div>
                     </TableCell>
@@ -383,20 +425,22 @@ ${tableBodyCells}
 }
 `;
 
-    // Write all four compiled visual assets to disk
+    // Save only the 4 essential files
     fs.writeFileSync(path.join(compDir, 'create-form.tsx'), createFormContent, 'utf8');
     fs.writeFileSync(path.join(compDir, 'edit-form.tsx'), editFormContent, 'utf8');
     fs.writeFileSync(path.join(compDir, 'delete-dialog.tsx'), deleteDialogContent, 'utf8');
     fs.writeFileSync(path.join(pageDir, 'page.tsx'), pageContent, 'utf8');
 
-    console.log(`✅ Generated UI Assets for: ${tableName}`);
-    console.log(`   └─ components/${tableName}/create-form.tsx`);
-    console.log(`   └─ components/${tableName}/edit-form.tsx`);
-    console.log(`   └─ components/${tableName}/delete-dialog.tsx`);
-    console.log(`   └─ app/dashboard/${tableName}/page.tsx`);
+    // Clean up any old wrapper files if they exist to keep the repository clean
+    const oldCreateDialog = path.join(compDir, 'create-dialog.tsx');
+    const oldEditDialog = path.join(compDir, 'edit-dialog.tsx');
+    if (fs.existsSync(oldCreateDialog)) fs.unlinkSync(oldCreateDialog);
+    if (fs.existsSync(oldEditDialog)) fs.unlinkSync(oldEditDialog);
+
+    console.log(`✅ Generated Self-Closing CRUD Views for: ${tableName}`);
   });
 
-  console.log('\n🎉 Front-end page and views generation complete!');
+  console.log('\n🎉 Clean view system compilation successful!');
 }
 
 generateViews();

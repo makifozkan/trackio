@@ -1,20 +1,22 @@
 'use client';
 
-import React, { useActionState } from 'react';
+import React, { useActionState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DialogClose } from '@/components/ui/dialog';
 import { updateUsersV2Action, ActionState } from '@/app/lib/actions/users_v2-actions';
 import { UsersV2 } from '@/app/lib/types/UsersV2';
 
-export function EditUsersV2Form({ record, onSuccess }: { record: UsersV2; onSuccess?: () => void }) {
+export function EditUsersV2Form({ record }: { record: UsersV2 }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
   const updateWithKeys = updateUsersV2Action.bind(null, record.id);
 
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prevState, formData) => {
       const res = await updateWithKeys(prevState, formData);
-      if (res.success && onSuccess) {
-        onSuccess();
+      if (res.success) {
+        closeRef.current?.click();
       }
       return res;
     },
@@ -22,7 +24,9 @@ export function EditUsersV2Form({ record, onSuccess }: { record: UsersV2; onSucc
   );
 
   return (
-    <form action={formAction} className="space-y-4 pt-4">
+    <form action={formAction} className="space-y-4 pt-4" encType="multipart/form-data">
+      <DialogClose ref={closeRef} className="hidden" />
+
       {state?.message && !state.success && (
         <div className="p-3 bg-destructive/15 text-destructive rounded-md text-sm">{state.message}</div>
       )}
@@ -55,12 +59,12 @@ export function EditUsersV2Form({ record, onSuccess }: { record: UsersV2; onSucc
 
         <div className="space-y-2">
           <Label htmlFor="image">IMAGE</Label>
-          <Input 
-            id="image" 
-            name="image" 
-            type="text" 
-            defaultValue={record.image !== undefined ? String(record.image) : ''} 
-          />
+          {record.image && (
+            <div className="mb-2">
+              <img src={String(record.image)} alt="Preview" className="h-16 w-16 object-cover rounded-md border" />
+            </div>
+          )}
+          <Input id="image" name="image" type="file" accept="image/*" />
           {state?.errors?.image && (
             <p className="text-xs text-destructive">{state.errors.image[0]}</p>
           )}

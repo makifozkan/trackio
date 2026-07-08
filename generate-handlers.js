@@ -64,7 +64,7 @@ function generateHandlers() {
 
     // Column lists for Select, Insert, and updates
     const columnNamesList = columns.map((col) => col.name).join(', ');
-    const updateFieldsList = nonPks.map((col) => `'${col.name}'`).join(', ');
+    const updateFieldsList = insertColumns.map((col) => `'${col.name}'`).join(', ');
 
     // Uses insertColumns and safe '?? null' defaults for the INSERT statement
     const nonPkNamesList = insertColumns.map((col) => col.name).join(', ');

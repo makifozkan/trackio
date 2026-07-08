@@ -63,7 +63,7 @@ export async function updateUsersV2(id: any, data: Partial<Omit<UsersV2, 'id'>>)
 
     const result = await sql<UsersV2[]>`
       UPDATE users_v2
-      SET ${sql(data, ...(['name', 'email', 'image', 'created_at'] as any[]))}
+      SET ${sql(data, ...(['name', 'email', 'image'] as any[]))}
       WHERE id = ${id}
       RETURNING id, name, email, image, created_at
     `;

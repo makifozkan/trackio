@@ -48,7 +48,7 @@ export default function DeleteUsersV2Button({ id }: DeleteProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this record from the &quot;users_v2&quot; table.
+            This action cannot be undone. This will permanently delete this record from the "users_v2" table.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -8,8 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -30,7 +30,7 @@ export default async function UsersV2Page() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Manage UsersV2</CardTitle>
           
-          {/* Create Modal Dialog */}
+          {/* Uncontrolled Create Dialog - Closes internally via <DialogClose> */}
           <Dialog>
             <DialogTrigger asChild>
               <Button>+ Create New</Button>
@@ -69,12 +69,18 @@ export default async function UsersV2Page() {
                   <TableCell>{String(item.id)}</TableCell>
                   <TableCell>{String(item.name)}</TableCell>
                   <TableCell>{String(item.email)}</TableCell>
-                  <TableCell>{String(item.image)}</TableCell>
+                  <TableCell>
+                    {item.image ? (
+                      <img src={String(item.image)} alt="Thumbnail" className="h-10 w-10 object-cover rounded border" />
+                    ) : (
+                      <span className="text-muted-foreground text-xs">No image</span>
+                    )}
+                  </TableCell>
                   <TableCell>{String(item.created_at)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2 items-center">
                         
-                        {/* Edit Modal Dialog */}
+                        {/* Uncontrolled Edit Dialog - Closes internally via <DialogClose> */}
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm">
@@ -89,7 +95,6 @@ export default async function UsersV2Page() {
                           </DialogContent>
                         </Dialog>
 
-                        {/* Delete Action Trigger */}
                         <DeleteUsersV2Button id={item.id} />
                       </div>
                     </TableCell>
