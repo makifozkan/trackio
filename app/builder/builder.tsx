@@ -1,13 +1,31 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge, Panel } from '@xyflow/react';
+import {
+  ReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge,
+  Panel,
+  MarkerType,
+  Node,
+  Edge,
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import UmlNode from './uml-node';
 import Sidebar from './sidebar';
 import DbTableNode from './db-table-node';
 import DataClassNode from './data-class-node';
-import { DATA_CLASS_PRESETS } from './presets';
+import { DATA_CLASS_PRESETS, DB_TABLE_PRESETS } from './presets';
+import ZodNode from './zod-node';
+
+const toPascalCase = (str: string) => {
+  return str
+    .replace(/[-_]+/g, ' ')
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+(.)(\w*)/g, ($1, $2, $3) => $2.toUpperCase() + $3.toLowerCase())
+    .replace(/\w/, (s) => s.toUpperCase());
+};
 
 // 2. Map your custom "uml" node type to the UmlNode React Component.
 // It is important to define this object OUTSIDE of your component to prevent re-renders.
@@ -15,9 +33,52 @@ const nodeTypes = {
   uml: UmlNode,
   dbTable: DbTableNode,
   dataClass: DataClassNode,
+  zodSchema: ZodNode,
 };
 
-const initialNodes = [
+const initialNodes: Node[] = [
+  {
+    id: 'invoice-zod-schema',
+    type: 'zodSchema', // Use the custom zodSchema node type
+    position: { x: 100, y: 100 },
+    data: {
+      name: 'FormSchema', // Name of the base schema
+      fields: [
+        {
+          name: 'id',
+          validation: 'z.string()',
+        },
+        {
+          name: 'customerId',
+          validation: "z.string({ invalid_type_error: 'Please select a customer.' })",
+        },
+        {
+          name: 'amount',
+          validation:
+            "z.coerce.number().gt(0, { message: 'Please enter an amount greater than $0.' })",
+        },
+        {
+          name: 'status',
+          validation:
+            "z.enum(['pending', 'paid'], { invalid_type_error: 'Please select an invoice status.' })",
+        },
+        {
+          name: 'date',
+          validation: 'z.string()',
+        },
+      ],
+      operations: [
+        {
+          name: 'CreateInvoice',
+          omitFields: ['id', 'date'], // These fields will be omitted in CreateInvoice
+        },
+        {
+          name: 'UpdateInvoice',
+          omitFields: ['id', 'date'], // These fields will be omitted in UpdateInvoice
+        },
+      ],
+    },
+  },
   {
     id: 'user-type',
     type: 'dataClass', // Start with one DB Table node
@@ -65,11 +126,21 @@ const initialNodes = [
   },
 ];
 
-const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
+const initialEdges = [
+  {
+    id: 'n1-n2',
+    source: 'n1',
+    target: 'n2',
+    markerEnd: {
+      type: MarkerType.ArrowClosed, // Can also be MarkerType.Arrow (open arrow)
+      color: '#333', // Color of the arrow
+    },
+  },
+];
 
 export default function Builder() {
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState<Node[]>(initialNodes);
+  const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
   // Track which node is currently selected
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -83,7 +154,20 @@ export default function Builder() {
     []
   );
   const onConnect = useCallback(
-    (params: any) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
+    (params: any) =>
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...params,
+            // --- Merge the markerEnd configuration into new connections ---
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: '#333',
+            },
+          },
+          eds
+        )
+      ),
     []
   );
 
@@ -110,6 +194,44 @@ export default function Builder() {
         return node;
       })
     );
+  };
+
+  const handleAddZodSchemaNode = () => {
+    const id = `zod-node-${Date.now()}`;
+    setNodes((nds) => [
+      ...nds,
+      {
+        id,
+        type: 'zodSchema',
+        position: { x: 200, y: 200 },
+        data: {
+          name: 'FormSchema',
+          fields: [
+            { name: 'id', validation: 'z.string()' },
+            {
+              name: 'customerId',
+              validation: "z.string({ invalid_type_error: 'Please select a customer.' })",
+            },
+            {
+              name: 'amount',
+              validation:
+                "z.coerce.number().gt(0, { message: 'Please enter an amount greater than $0.' })",
+            },
+            {
+              name: 'status',
+              validation:
+                "z.enum(['pending', 'paid'], { invalid_type_error: 'Please select an invoice status.' })",
+            },
+            { name: 'date', validation: 'z.string()' },
+          ],
+          operations: [
+            { name: 'CreateInvoice', omitFields: ['id', 'date'] },
+            { name: 'UpdateInvoice', omitFields: ['id', 'date'] },
+          ],
+        },
+      },
+    ]);
+    setSelectedNodeId(id);
   };
 
   // --- Add Data Class Handler (New) ---
@@ -192,6 +314,105 @@ export default function Builder() {
     setSelectedNodeId(id); // Auto-focus the sidebar on the newly created node
   };
 
+  const handleAutowireZodSchema = (tableNode: any) => {
+    const { tableName, columns } = tableNode.data;
+    if (!tableName) return;
+
+    const pascalName = toPascalCase(tableName);
+
+    // Map SQL Column Types to Zod Validation types
+    const mappedFields = columns.map((col: any) => {
+      let zodType = 'string'; // Default fallback
+      const sqlType = col.type.toUpperCase();
+
+      if (
+        sqlType.includes('INT') ||
+        sqlType.includes('SERIAL') ||
+        sqlType.includes('DECIMAL') ||
+        sqlType.includes('BIGINT')
+      ) {
+        zodType = 'number';
+      }
+
+      return {
+        name: col.name,
+        type: zodType,
+        errorMessage: col.isPK ? '' : `Please enter a valid ${col.name}.`,
+      };
+    });
+
+    const id = `zod-node-${Date.now()}`;
+
+    // Create the new Zod Schema node
+    const newZodSchemaNode = {
+      id,
+      type: 'zodSchema',
+      // Position it 300 pixels to the right, and slightly below the DB Table node
+      position: {
+        x: tableNode.position.x + 300,
+        y: tableNode.position.y + 120,
+      },
+      data: {
+        name: `${pascalName}Schema`, // e.g. "UsersSchema"
+        fields: mappedFields,
+        // Auto-configure the standard Create/Update sub-schemas
+        operations: [
+          { name: `Create${pascalName}`, omitFields: [] },
+          { name: `Update${pascalName}`, omitFields: [] },
+        ],
+      },
+    };
+
+    setNodes((nds) => [...nds, newZodSchemaNode]);
+    setSelectedNodeId(id); // Auto-focus the sidebar on the newly created schema
+  };
+
+  const handleAutowireDataClass = (tableNode: any) => {
+    const { tableName, columns } = tableNode.data;
+    if (!tableName) return;
+
+    const pascalName = toPascalCase(tableName);
+
+    // Map SQL Column Types to TypeScript Types
+    const mappedAttributes = columns.map((col: any) => {
+      let tsType = 'string'; // Default fallback
+      const sqlType = col.type.toUpperCase();
+
+      if (
+        sqlType.includes('INT') ||
+        sqlType.includes('SERIAL') ||
+        sqlType.includes('DECIMAL') ||
+        sqlType.includes('BIGINT')
+      ) {
+        tsType = 'number';
+      } else if (sqlType.includes('BOOL')) {
+        tsType = 'boolean';
+      }
+
+      return `${col.name}: ${tsType}`;
+    });
+
+    const id = `dataclass-node-${Date.now()}`;
+
+    // Create the new Data Class node
+    const newDataClassNode = {
+      id,
+      type: 'dataClass',
+      // Position it 300 pixels to the right of the DB Table node
+      position: {
+        x: tableNode.position.x + 300,
+        y: tableNode.position.y,
+      },
+      data: {
+        name: pascalName,
+        attributes: mappedAttributes,
+      },
+    };
+
+    setNodes((nds) => [...nds, newDataClassNode]);
+    setSelectedNodeId(id); // Auto-focus the sidebar on the newly created type
+  };
+
   // --- Delete Node Handler ---
   const handleDeleteNode = (idToDelete: string) => {
     // 1. Remove the node
@@ -250,6 +471,29 @@ export default function Builder() {
     URL.revokeObjectURL(url);
   };
 
+  const handleAddDbTablePreset = (presetKey: keyof typeof DB_TABLE_PRESETS) => {
+    const id = `db-node-${Date.now()}`;
+    const preset = DB_TABLE_PRESETS[presetKey];
+
+    setNodes((nds) => [
+      ...nds,
+      {
+        id,
+        type: 'dbTable',
+        position: {
+          x: 100 + Math.random() * 100,
+          y: 100 + Math.random() * 100,
+        },
+        data: {
+          tableName: preset.tableName,
+          // Deep copy columns array to prevent shared references
+          columns: preset.columns.map((col) => ({ ...col })),
+        },
+      },
+    ]);
+    setSelectedNodeId(id); // Auto-focus sidebar on the spawned table
+  };
+
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
       <div style={{ flexGrow: 1, height: '100%' }}>
@@ -272,6 +516,12 @@ export default function Builder() {
           >
             <button onClick={handleAddUmlNode} style={{ ...topBtnStyle, background: '#0066cc' }}>
               + Add Class
+            </button>
+            <button
+              onClick={handleAddZodSchemaNode}
+              style={{ ...topBtnStyle, background: '#4f46e5' }}
+            >
+              + Add Zod Schema
             </button>
             <button
               onClick={handleAddDbTableNode}
@@ -305,7 +555,37 @@ export default function Builder() {
             >
               + Add Invoice Preset
             </button>
-
+            {/* --- NEW: DB Table Presets Dropdown --- */}
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  handleAddDbTablePreset(e.target.value as any);
+                  e.target.value = ''; // Reset select to default placeholder
+                }
+              }}
+              style={{
+                ...topBtnStyle,
+                background: '#e28743',
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            >
+              <option value="" style={{ background: '#fff', color: '#222' }}>
+                📋 Add DB Table Preset...
+              </option>
+              <option value="users" style={{ background: '#fff', color: '#222' }}>
+                users (Auth & Profile)
+              </option>
+              <option value="sessions" style={{ background: '#fff', color: '#222' }}>
+                sessions (NextAuth sessions)
+              </option>
+              <option value="products" style={{ background: '#fff', color: '#222' }}>
+                products (E-commerce Catalog)
+              </option>
+              <option value="invoices" style={{ background: '#fff', color: '#222' }}>
+                invoices (Transactions & Billing)
+              </option>
+            </select>
             <button onClick={handleExportJson} style={{ ...topBtnStyle, background: '#28a745' }}>
               💾 Export JSON
             </button>
@@ -318,6 +598,8 @@ export default function Builder() {
           node={selectedNode}
           onUpdate={handleUpdateNodeData}
           onDelete={handleDeleteNode}
+          onAutowireDataClass={handleAutowireDataClass} // <-- Pass it here
+          onAutowireZodSchema={handleAutowireZodSchema}
           onClose={() => setSelectedNodeId(null)}
         />
       )}

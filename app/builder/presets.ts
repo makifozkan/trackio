@@ -37,3 +37,45 @@ export const DATA_CLASS_PRESETS = {
     ],
   },
 };
+
+export const DB_TABLE_PRESETS = {
+  users: {
+    tableName: 'users',
+    columns: [
+      { name: 'id', type: 'SERIAL', isPK: true },
+      { name: 'name', type: 'VARCHAR(255)' },
+      { name: 'email', type: 'VARCHAR(255)' },
+      { name: 'image', type: 'TEXT' },
+      { name: 'created_at', type: 'TIMESTAMPTZ' },
+    ],
+  },
+  sessions: {
+    tableName: 'sessions',
+    columns: [
+      { name: 'id', type: 'UUID', isPK: true },
+      { name: 'user_id', type: 'UUID', isFK: true },
+      { name: 'session_token', type: 'TEXT' },
+      { name: 'expires', type: 'TIMESTAMPTZ' },
+    ],
+  },
+  products: {
+    tableName: 'products',
+    columns: [
+      { name: 'id', type: 'SERIAL', isPK: true },
+      { name: 'sku', type: 'VARCHAR(255)' },
+      { name: 'name', type: 'VARCHAR(255)' },
+      { name: 'price', type: 'DECIMAL' },
+      { name: 'stock', type: 'INT' },
+    ],
+  },
+  invoices: {
+    tableName: 'invoices',
+    columns: [
+      { name: 'id', type: 'SERIAL', isPK: true },
+      { name: 'customer_id', type: 'INT', isFK: true },
+      { name: 'amount', type: 'DECIMAL' },
+      { name: 'status', type: 'VARCHAR(255)' },
+      { name: 'due_date', type: 'DATE' },
+    ],
+  },
+};

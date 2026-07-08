@@ -5,11 +5,22 @@ interface SidebarProps {
   onUpdate: (id: string, newData: any) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
+  onAutowireDataClass?: (node: any) => void;
+  onAutowireZodSchema?: (node: any) => void;
 }
 
-export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarProps) {
+export default function Sidebar({
+  node,
+  onUpdate,
+  onDelete,
+  onClose,
+  onAutowireDataClass,
+  onAutowireZodSchema,
+}: SidebarProps) {
   const isUml = node.type === 'uml';
   const isDataClass = node.type === 'dataClass'; // Added check
+  const isDbTable = node.type === 'dbTable'; // Added check
+  const isZod = node.type === 'zodSchema';
   const data = node.data;
 
   // --- Styles ---
@@ -108,6 +119,68 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
     onUpdate(node.id, { columns: updated });
   };
 
+  // Zod Schema Specific Event Handlers
+  // ==========================================
+  const handleZodFieldNameChange = (index: number, val: string) => {
+    const updated = [...data.fields];
+    updated[index] = { ...updated[index], name: val };
+    onUpdate(node.id, { fields: updated });
+  };
+
+  const handleZodFieldValidationChange = (index: number, val: string) => {
+    const updated = [...data.fields];
+    updated[index] = { ...updated[index], validation: val };
+    onUpdate(node.id, { fields: updated });
+  };
+
+  const addZodField = () => {
+    onUpdate(node.id, {
+      fields: [...data.fields, { name: 'newField', validation: 'z.string()' }],
+    });
+  };
+
+  const deleteZodField = (index: number) => {
+    const updated = data.fields.filter((_: any, i: number) => i !== index);
+    onUpdate(node.id, { fields: updated });
+  };
+
+  // Sub-schema Operations Handlers
+  const addZodOperation = () => {
+    const currentOps = data.operations || [];
+    onUpdate(node.id, {
+      operations: [...currentOps, { name: 'CreateSchema', omitFields: [] }],
+    });
+  };
+
+  const deleteZodOperation = (index: number) => {
+    const currentOps = data.operations || [];
+    const updated = currentOps.filter((_: any, i: number) => i !== index);
+    onUpdate(node.id, { operations: updated });
+  };
+
+  const handleOperationNameChange = (index: number, val: string) => {
+    const currentOps = [...(data.operations || [])];
+    currentOps[index] = { ...currentOps[index], name: val };
+    onUpdate(node.id, { operations: currentOps });
+  };
+
+  const handleToggleOmitField = (opIndex: number, fieldName: string, isChecked: boolean) => {
+    const currentOps = [...(data.operations || [])];
+    const op = currentOps[opIndex];
+
+    let updatedOmitFields;
+    if (isChecked) {
+      // If checked, add field to omit list
+      updatedOmitFields = [...op.omitFields, fieldName];
+    } else {
+      // If unchecked, remove field from omit list
+      updatedOmitFields = op.omitFields.filter((f: string) => f !== fieldName);
+    }
+
+    currentOps[opIndex] = { ...op, omitFields: updatedOmitFields };
+    onUpdate(node.id, { operations: currentOps });
+  };
+
   return (
     <div style={sidebarStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -122,55 +195,23 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
       </div>
 
       {/* RENDER FOR UML CLASS OR DATA CLASS */}
-      {isUml || isDataClass ? (
-        <>
-          <div>
-            <label
-              style={{
-                fontSize: '11px',
-                fontWeight: 'bold',
-                display: 'block',
-                marginBottom: '4px',
-              }}
-            >
-              {isUml ? 'Class Name' : 'Type Name'}
-            </label>
-            <input style={inputStyle} value={data.name} onChange={handleNameChange} />
-          </div>
-
-          <div>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '8px',
-              }}
-            >
-              <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Properties</label>
-              <button onClick={addAttribute} style={btnStyle}>
-                + Add Field
-              </button>
+      {isUml ||
+        (isDataClass && (
+          <>
+            <div>
+              <label
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  display: 'block',
+                  marginBottom: '4px',
+                }}
+              >
+                {isUml ? 'Class Name' : 'Type Name'}
+              </label>
+              <input style={inputStyle} value={data.name} onChange={handleNameChange} />
             </div>
-            {data.attributes.map((attr: string, index: number) => (
-              <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-                <input
-                  style={inputStyle}
-                  value={attr}
-                  onChange={(e) => handleAttributeChange(index, e.target.value)}
-                />
-                <button
-                  onClick={() => deleteAttribute(index)}
-                  style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
-                >
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
 
-          {/* Render methods ONLY for UML Class */}
-          {isUml && (
             <div>
               <div
                 style={{
@@ -180,20 +221,20 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
                   marginBottom: '8px',
                 }}
               >
-                <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Methods</label>
-                <button onClick={addMethod} style={btnStyle}>
-                  + Add Method
+                <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Properties</label>
+                <button onClick={addAttribute} style={btnStyle}>
+                  + Add Field
                 </button>
               </div>
-              {(data.methods || []).map((method: string, index: number) => (
+              {data.attributes.map((attr: string, index: number) => (
                 <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
                   <input
                     style={inputStyle}
-                    value={method}
-                    onChange={(e) => handleMethodChange(index, e.target.value)}
+                    value={attr}
+                    onChange={(e) => handleAttributeChange(index, e.target.value)}
                   />
                   <button
-                    onClick={() => deleteMethod(index)}
+                    onClick={() => deleteAttribute(index)}
                     style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
                   >
                     X
@@ -201,9 +242,44 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
                 </div>
               ))}
             </div>
-          )}
-        </>
-      ) : (
+
+            {/* Render methods ONLY for UML Class */}
+            {isUml && (
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Methods</label>
+                  <button onClick={addMethod} style={btnStyle}>
+                    + Add Method
+                  </button>
+                </div>
+                {(data.methods || []).map((method: string, index: number) => (
+                  <div key={index} style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+                    <input
+                      style={inputStyle}
+                      value={method}
+                      onChange={(e) => handleMethodChange(index, e.target.value)}
+                    />
+                    <button
+                      onClick={() => deleteMethod(index)}
+                      style={{ ...btnStyle, background: '#cc0000', marginBottom: '8px' }}
+                    >
+                      X
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ))}
+
+      {isDbTable && (
         /* RENDER FOR DB TABLE */
         <>
           <div>
@@ -218,6 +294,42 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
               Table Name
             </label>
             <input style={inputStyle} value={data.tableName} onChange={handleTableNameChange} />
+          </div>
+          {/* DB Table Autowire Actions */}
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '15px' }}
+          >
+            {/* 1. Autowire Data Class */}
+            <button
+              onClick={() => onAutowireDataClass?.(node)}
+              style={{
+                ...btnStyle,
+                background: '#008080',
+                width: '100%',
+                padding: '10px',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                marginBottom: 0,
+              }}
+            >
+              🔌 Autowire Data Class (Type)
+            </button>
+
+            {/* 2. ADDED: Autowire Zod Schema */}
+            <button
+              onClick={() => onAutowireZodSchema?.(node)}
+              style={{
+                ...btnStyle,
+                background: '#4f46e5', // Indigo color matching the Zod theme
+                width: '100%',
+                padding: '10px',
+                fontWeight: 'bold',
+                fontSize: '11px',
+                marginBottom: 0,
+              }}
+            >
+              🛡️ Autowire Zod Schema (Validator)
+            </button>
           </div>
 
           <div>
@@ -250,12 +362,23 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
                     placeholder="column_name"
                     onChange={(e) => handleColumnChange(index, 'name', e.target.value)}
                   />
-                  <input
+                  <select
                     style={{ ...inputStyle, width: '40%' }}
-                    value={col.type}
-                    placeholder="INT"
+                    value={col.type || 'VARCHAR(255)'} // Default to VARCHAR(255) if empty
                     onChange={(e) => handleColumnChange(index, 'type', e.target.value)}
-                  />
+                  >
+                    <option value="SERIAL">SERIAL (Auto-ID)</option>
+                    <option value="INT">INT</option>
+                    <option value="BIGINT">BIGINT</option>
+                    <option value="VARCHAR(255)">VARCHAR(255)</option>
+                    <option value="TEXT">TEXT</option>
+                    <option value="BOOLEAN">BOOLEAN</option>
+                    <option value="DATE">DATE</option>
+                    <option value="TIMESTAMP">TIMESTAMP</option>
+                    <option value="TIMESTAMPTZ">TIMESTAMPTZ (with TZ)</option>
+                    <option value="UUID">UUID</option>
+                    <option value="DECIMAL">DECIMAL</option>
+                  </select>
                   <button
                     onClick={() => deleteColumn(index)}
                     style={{ ...btnStyle, background: '#cc0000', height: '33px' }}
@@ -287,6 +410,166 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
         </>
       )}
 
+      {/* 4. CONDITIONAL RENDER: ZOD SCHEMA PANEL */}
+      {isZod && (
+        <>
+          {/* Base Schema Name */}
+          <div>
+            <label
+              style={{
+                fontSize: '11px',
+                fontWeight: 'bold',
+                display: 'block',
+                marginBottom: '4px',
+              }}
+            >
+              Base Schema Name
+            </label>
+            <input style={inputStyle} value={data.name} onChange={handleNameChange} />
+          </div>
+
+          {/* Base Object Fields */}
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '8px',
+              }}
+            >
+              <label style={{ fontSize: '11px', fontWeight: 'bold' }}>Schema Fields</label>
+              <button onClick={addZodField} style={{ ...btnStyle, background: '#4f46e5' }}>
+                + Add Field
+              </button>
+            </div>
+            {data.fields.map((field: any, index: number) => (
+              <div
+                key={index}
+                style={{
+                  borderBottom: '1px solid #eee',
+                  paddingBottom: '10px',
+                  marginBottom: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', gap: '5px' }}>
+                  <input
+                    style={{ ...inputStyle, width: '40%' }}
+                    value={field.name}
+                    placeholder="field_name"
+                    onChange={(e) => handleZodFieldNameChange(index, e.target.value)}
+                  />
+                  <input
+                    style={{ ...inputStyle, width: '50%' }}
+                    value={field.validation}
+                    placeholder="z.string()"
+                    onChange={(e) => handleZodFieldValidationChange(index, e.target.value)}
+                  />
+                  <button
+                    onClick={() => deleteZodField(index)}
+                    style={{ ...btnStyle, background: '#cc0000', height: '33px' }}
+                  >
+                    X
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sub-schema Operations (Select Omit Fields) */}
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '8px',
+              }}
+            >
+              <label style={{ fontSize: '11px', fontWeight: 'bold' }}>
+                Sub-Schemas (Omit Editor)
+              </label>
+              <button onClick={addZodOperation} style={{ ...btnStyle, background: '#4f46e5' }}>
+                + Add Sub-Schema
+              </button>
+            </div>
+            {(data.operations || []).map((op: any, opIndex: number) => (
+              <div
+                key={opIndex}
+                style={{
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  padding: '10px',
+                  marginBottom: '10px',
+                  background: '#f8fafc',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: '5px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <input
+                    style={{ ...inputStyle, marginBottom: 0 }}
+                    value={op.name}
+                    placeholder="CreateInvoiceSchema"
+                    onChange={(e) => handleOperationNameChange(opIndex, e.target.value)}
+                  />
+                  <button
+                    onClick={() => deleteZodOperation(opIndex)}
+                    style={{ ...btnStyle, background: '#cc0000' }}
+                  >
+                    X
+                  </button>
+                </div>
+
+                {/* Checkbox Grid for Omit Fields */}
+                <div style={{ fontSize: '11px' }}>
+                  <div style={{ fontWeight: 'bold', color: '#64748b', marginBottom: '4px' }}>
+                    Select Fields to Omit:
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {data.fields.map((field: any, fIndex: number) => {
+                      const isOmitted = op.omitFields.includes(field.name);
+                      return (
+                        <label
+                          key={fIndex}
+                          style={{
+                            display: 'flex',
+                            gap: '6px',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isOmitted}
+                            onChange={(e) =>
+                              handleToggleOmitField(opIndex, field.name, e.target.checked)
+                            }
+                          />
+                          <span
+                            style={{
+                              textDecoration: isOmitted ? 'line-through' : 'none',
+                              color: isOmitted ? '#94a3b8' : '#222',
+                            }}
+                          >
+                            {field.name}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {/* Delete Node Button */}
       <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid #eee' }}>
         <button
@@ -302,6 +585,7 @@ export default function Sidebar({ node, onUpdate, onDelete, onClose }: SidebarPr
         >
           {isUml && 'Delete Class'}
           {isDataClass && 'Delete Type'}
+          {isZod && 'Delete Schema'}
           {node.type === 'dbTable' && 'Delete Table'}
         </button>
       </div>

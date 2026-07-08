@@ -4,27 +4,6 @@ const path = require('path');
 const jsonFilePath = path.join(__dirname, 'schema-diagram.json');
 const outputDir = path.join(__dirname, 'app', 'lib', 'db-handlers');
 
-// Helper to convert SQL types to TS types
-function sqlToTsType(sqlType) {
-  const type = sqlType.toUpperCase();
-  if (
-    type.includes('INT') ||
-    type.includes('DECIMAL') ||
-    type.includes('NUMERIC') ||
-    type.includes('FLOAT') ||
-    type.includes('REAL')
-  ) {
-    return 'number';
-  }
-  if (type.includes('BOOL')) {
-    return 'boolean';
-  }
-  if (type.includes('DATE') || type.includes('TIME') || type.includes('TIMESTAMP')) {
-    return 'Date | string';
-  }
-  return 'string'; // Default fallback (TEXT, VARCHAR, UUID etc)
-}
-
 function toPascalCase(str) {
   return str
     .replace(/[-_]+/g, ' ')
@@ -70,12 +49,8 @@ function generateHandlers() {
     const pks = columns.filter((col) => col.isPK);
     const nonPks = columns.filter((col) => !col.isPK);
 
-    // 1. Generate local TypeScript types based on the columns
-    const tsFields = columns.map((col) => `  ${col.name}: ${sqlToTsType(col.type)};`);
-    const typeDef = `export type Db${pascalName} = {\n${tsFields.join('\n')}\n};`;
-
-    // 2. Build PK query args and WHERE clause strings (Supports Composite Keys)
-    const pkArgs = pks.map((pk) => `${pk.name}: ${sqlToTsType(pk.type)}`).join(', ');
+    // Build PK query args and WHERE clause strings (Supports Composite Keys)
+    const pkArgs = pks.map((pk) => `${pk.name}: any`).join(', '); // Types are handled by the imported interface
     const pkWhereClause = pks.map((pk) => `${pk.name} = \${${pk.name}}`).join(' AND ');
 
     // Column lists for Select and Insert
@@ -83,7 +58,7 @@ function generateHandlers() {
     const nonPkNamesList = nonPks.map((col) => col.name).join(', ');
     const nonPkValuesList = nonPks.map((col) => `\${data.${col.name}}`).join(', ');
 
-    // 3. Build Update assignments (e.g. name = ${data.name})
+    // Build Update assignments
     const updateAssignments = nonPks
       .map(
         (col) =>
@@ -91,17 +66,18 @@ function generateHandlers() {
       )
       .join(',\n');
 
-    // 4. Construct the complete CRUD handler file content
+    // ==========================================
+    // UPDATED TEMPLATE: Import types from lib/types/
+    // ==========================================
     const fileContent = `import { sql } from '../db';
-
-${typeDef}
+import { ${pascalName} } from '../types/${pascalName}'; // Import central type from generate-types.js
 
 /**
  * FETCH ALL RECORDS
  */
-export async function fetchAll${pascalName}s(): Promise<Db${pascalName}[]> {
+export async function fetchAll${pascalName}s(): Promise<${pascalName}[]> {
   try {
-    const data = await sql<Db${pascalName}[]>\`
+    const data = await sql<${pascalName}[]>\`
       SELECT ${columnNamesList}
       FROM ${tableName}
     \`;
@@ -115,9 +91,9 @@ export async function fetchAll${pascalName}s(): Promise<Db${pascalName}[]> {
 /**
  * FETCH SINGLE RECORD BY PRIMARY KEY(S)
  */
-export async function fetch${pascalName}ById(${pkArgs}): Promise<Db${pascalName} | null> {
+export async function fetch${pascalName}ById(${pkArgs}): Promise<${pascalName} | null> {
   try {
-    const data = await sql<Db${pascalName}[]>\`
+    const data = await sql<${pascalName}[]>\`
       SELECT ${columnNamesList}
       FROM ${tableName}
       WHERE ${pkWhereClause}
@@ -132,9 +108,9 @@ export async function fetch${pascalName}ById(${pkArgs}): Promise<Db${pascalName}
 /**
  * CREATE NEW RECORD
  */
-export async function create${pascalName}(data: Omit<Db${pascalName}, ${pks.map((pk) => `'${pk.name}'`).join(' | ')}>): Promise<Db${pascalName}> {
+export async function create${pascalName}(data: Omit<${pascalName}, ${pks.map((pk) => `'${pk.name}'`).join(' | ')}>): Promise<${pascalName}> {
   try {
-    const result = await sql<Db${pascalName}[]>\`
+    const result = await sql<${pascalName}[]>\`
       INSERT INTO ${tableName} (${nonPkNamesList})
       VALUES (${nonPkValuesList})
       RETURNING ${columnNamesList}
@@ -149,9 +125,9 @@ export async function create${pascalName}(data: Omit<Db${pascalName}, ${pks.map(
 /**
  * UPDATE EXISTING RECORD (SAFE PARTIAL UPDATE)
  */
-export async function update${pascalName}(${pkArgs}, data: Partial<Omit<Db${pascalName}, ${pks.map((pk) => `'${pk.name}'`).join(' | ')}>>): Promise<Db${pascalName}> {
+export async function update${pascalName}(${pkArgs}, data: Partial<Omit<${pascalName}, ${pks.map((pk) => `'${pk.name}'`).join(' | ')}>>): Promise<${pascalName}> {
   try {
-    const result = await sql<Db${pascalName}[]>\`
+    const result = await sql<${pascalName}[]>\`
       UPDATE ${tableName}
       SET
 ${updateAssignments}
