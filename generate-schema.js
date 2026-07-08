@@ -49,8 +49,20 @@ function generateSQL() {
     const primaryKeys = columns.filter((col) => col.isPK).map((col) => col.name);
 
     const columnLines = columns.map((col) => {
-      const nullConstraint = col.isPK ? ' NOT NULL' : '';
-      return `    ${col.name} ${col.type.toUpperCase()}${nullConstraint}`;
+      let line = `    ${col.name} ${col.type.toUpperCase()}`;
+
+      // 1. Add NOT NULL constraint (Primary keys are always NOT NULL)
+      if (col.isPK || col.isNotNull) {
+        line += ' NOT NULL';
+      }
+
+      // 2. Add DEFAULT value constraint if specified
+      if (col.defaultValue && col.defaultValue.trim() !== '') {
+        const defaultVal = col.defaultValue.trim();
+        line += ` DEFAULT ${defaultVal}`;
+      }
+
+      return line;
     });
 
     if (primaryKeys.length > 0) {

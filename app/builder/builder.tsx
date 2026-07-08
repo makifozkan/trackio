@@ -576,6 +576,9 @@ export default function Builder() {
               <option value="users" style={{ background: '#fff', color: '#222' }}>
                 users (Auth & Profile)
               </option>
+              <option value="users_v2" style={{ background: '#fff', color: '#222' }}>
+                users v2
+              </option>
               <option value="sessions" style={{ background: '#fff', color: '#222' }}>
                 sessions (NextAuth sessions)
               </option>

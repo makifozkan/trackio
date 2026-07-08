@@ -78,4 +78,14 @@ export const DB_TABLE_PRESETS = {
       { name: 'due_date', type: 'DATE' },
     ],
   },
+  users_v2: {
+    tableName: 'users_v2',
+    columns: [
+      { name: 'id', type: 'UUID', isPK: true, defaultValue: 'uuid_generate_v4()' },
+      { name: 'name', type: 'VARCHAR(255)', isNotNull: true },
+      { name: 'email', type: 'VARCHAR(255)', isNotNull: true },
+      { name: 'image', type: 'TEXT' },
+      { name: 'created_at', type: 'TIMESTAMPTZ', isNotNull: true, defaultValue: 'now()' },
+    ],
+  },
 };

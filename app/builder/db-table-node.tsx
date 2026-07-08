@@ -5,6 +5,7 @@ interface Column {
   type: string;
   isPK?: boolean;
   isFK?: boolean;
+  isNotNull?: boolean;
 }
 
 interface DbTableNodeData {
@@ -66,7 +67,18 @@ export default function DbTableNode({
             <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
               {col.isPK && <span title="Primary Key">🔑</span>}
               {col.isFK && <span title="Foreign Key">🔗</span>}
-              <span style={{ fontWeight: col.isPK ? 'bold' : 'normal' }}>{col.name}</span>
+              <span style={{ fontWeight: col.isPK ? 'bold' : 'normal' }}>
+                {col.name}
+                {/* Visual indicator for NOT NULL columns */}
+                {(col.isPK || col.isNotNull) && (
+                  <span
+                    style={{ color: '#cc0000', marginLeft: '2px', fontWeight: 'bold' }}
+                    title="Not Null"
+                  >
+                    *
+                  </span>
+                )}
+              </span>
             </div>
 
             {/* SQL Data Type */}

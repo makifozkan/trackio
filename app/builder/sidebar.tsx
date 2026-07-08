@@ -386,8 +386,9 @@ export default function Sidebar({
                     X
                   </button>
                 </div>
-                <div style={{ display: 'flex', gap: '15px', fontSize: '11px' }}>
-                  <label>
+                {/* PK / FK / Not Null Checkboxes */}
+                <div style={{ display: 'flex', gap: '15px', fontSize: '11px', marginTop: '6px' }}>
+                  <label style={{ cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={col.isPK || false}
@@ -395,7 +396,7 @@ export default function Sidebar({
                     />{' '}
                     Key (🔑 PK)
                   </label>
-                  <label>
+                  <label style={{ cursor: 'pointer' }}>
                     <input
                       type="checkbox"
                       checked={col.isFK || false}
@@ -403,6 +404,23 @@ export default function Sidebar({
                     />{' '}
                     Relation (🔗 FK)
                   </label>
+                  <label style={{ cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={col.isNotNull || false}
+                      onChange={(e) => handleColumnChange(index, 'isNotNull', e.target.checked)}
+                    />{' '}
+                    Not Null (<b>*</b>)
+                  </label>
+                </div>
+                {/* Default Value Input Field */}
+                <div style={{ marginTop: '6px' }}>
+                  <input
+                    style={{ ...inputStyle, fontSize: '11px', padding: '6px', marginBottom: 0 }}
+                    value={col.defaultValue || ''}
+                    placeholder="Default Value (e.g. now() or uuid_generate_v4())"
+                    onChange={(e) => handleColumnChange(index, 'defaultValue', e.target.value)}
+                  />
                 </div>
               </div>
             ))}
