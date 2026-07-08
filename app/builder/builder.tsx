@@ -18,6 +18,70 @@ import DbTableNode from './db-table-node';
 import DataClassNode from './data-class-node';
 import { DATA_CLASS_PRESETS, DB_TABLE_PRESETS } from './presets';
 import ZodNode from './zod-node';
+// ==========================================
+// 1. Column and Database Node Data Types (Converted to types)
+// ==========================================
+export type DbColumn = {
+  name: string;
+  type: string;
+  isPK?: boolean;
+  isFK?: boolean;
+  isNotNull?: boolean;
+  defaultValue?: string;
+};
+
+export type DbTableNodeData = {
+  tableName: string;
+  columns: DbColumn[];
+};
+
+// ==========================================
+// 2. UML Node Data Types (Converted to types)
+// ==========================================
+export type UmlNodeData = {
+  name: string;
+  attributes: string[];
+  methods: string[];
+  stereotype?: 'interface' | 'abstract' | 'dataclass';
+};
+
+// ==========================================
+// 3. Data Class Node Data Types (Converted to types)
+// ==========================================
+export type DataClassNodeData = {
+  name: string;
+  attributes: string[];
+};
+
+// ==========================================
+// 4. Zod Schema Node Data Types (Converted to types)
+// ==========================================
+export type ZodField = {
+  name: string;
+  validation?: string;
+};
+
+export type ZodOperation = {
+  name: string;
+  omitFields: string[];
+};
+
+export type ZodSchemaNodeData = {
+  name: string;
+  fields: ZodField[];
+  operations?: ZodOperation[];
+};
+
+// ==========================================
+// 5. THE DISCRIMINATED UNION
+// ==========================================
+export type DbTableNode = Node<DbTableNodeData, 'dbTable'>;
+export type UmlNode = Node<UmlNodeData, 'uml'>;
+export type DataClassNode = Node<DataClassNodeData, 'dataClass'>;
+export type ZodSchemaNode = Node<ZodSchemaNodeData, 'zodSchema'>;
+
+// This represents ANY valid node on your canvas, fully typed!
+export type AppNode = DbTableNode | UmlNode | DataClassNode | ZodSchemaNode;
 
 const toPascalCase = (str: string) => {
   return str
@@ -25,6 +89,13 @@ const toPascalCase = (str: string) => {
     .replace(/[^\w\s]/g, '')
     .replace(/\s+(.)(\w*)/g, ($1, $2, $3) => $2.toUpperCase() + $3.toLowerCase())
     .replace(/\w/, (s) => s.toUpperCase());
+};
+
+const getSingularName = (tableName: string) => {
+  const name = tableName.toLowerCase();
+  if (name.endsWith('ies')) return name.slice(0, -3) + 'y'; // e.g. categories -> category
+  if (name.endsWith('s')) return name.slice(0, -1); // e.g. users -> user
+  return name;
 };
 
 // 2. Map your custom "uml" node type to the UmlNode React Component.
@@ -36,7 +107,7 @@ const nodeTypes = {
   zodSchema: ZodNode,
 };
 
-const initialNodes: Node[] = [
+const initialNodes: AppNode[] = [
   {
     id: 'invoice-zod-schema',
     type: 'zodSchema', // Use the custom zodSchema node type
@@ -139,7 +210,7 @@ const initialEdges = [
 ];
 
 export default function Builder() {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
+  const [nodes, setNodes] = useState<AppNode[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
 
   // Track which node is currently selected
@@ -154,21 +225,78 @@ export default function Builder() {
     []
   );
   const onConnect = useCallback(
-    (params: any) =>
+    (params: any) => {
+      // 1. Append the new edge with a styled relationship label & closed arrow
       setEdges((eds) =>
         addEdge(
           {
             ...params,
-            // --- Merge the markerEnd configuration into new connections ---
+            label: '1-to-N (One-to-Many)', // Default relationship type
+            style: { stroke: '#e28743', strokeWidth: 2 }, // Orange relationship line
             markerEnd: {
               type: MarkerType.ArrowClosed,
-              color: '#333',
+              color: '#e28743',
             },
           },
           eds
         )
-      ),
-    []
+      );
+
+      // 2. Resolve nodes in state
+      const sourceNode = nodes.find((n) => n.id === params.source);
+      const targetNode = nodes.find((n) => n.id === params.target);
+
+      // 3. Automated Foreign Key Injection Logic
+      if (
+        sourceNode &&
+        targetNode &&
+        sourceNode.type === 'dbTable' &&
+        targetNode.type === 'dbTable'
+      ) {
+        const parentTableName = sourceNode.data.tableName;
+        const singularParentName = getSingularName(parentTableName);
+        const fkColumnName = `${singularParentName}_id`; // e.g. "user_id"
+
+        // Find the Primary Key of the parent to match the data type
+        const parentPk = sourceNode.data.columns.find((col: any) => col.isPK);
+        const parentPkType = parentPk ? parentPk.type.toUpperCase() : 'INT';
+
+        // Map SERIAL -> INT (A referencing column cannot be auto-increment SERIAL)
+        const fkDataType = parentPkType === 'SERIAL' ? 'INT' : parentPkType;
+
+        // Check if the target child table already has this column
+        const targetColumns = targetNode.data.columns || [];
+        const alreadyHasFk = targetColumns.some((col: any) => col.name === fkColumnName);
+
+        if (!alreadyHasFk) {
+          // Inject the new foreign key column into the target child node
+          setNodes((currentNodes) =>
+            currentNodes.map((node) => {
+              if (node.id === targetNode.id) {
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    columns: [
+                      ...(node.data as DbTableNodeData).columns,
+                      {
+                        name: fkColumnName,
+                        type: fkDataType,
+                        isFK: true, // Marked as Foreign Key
+                        isNotNull: false,
+                        defaultValue: '',
+                      },
+                    ],
+                  },
+                } as DbTableNode;
+              }
+              return node;
+            })
+          );
+        }
+      }
+    },
+    [nodes, setEdges, setNodes] // Ensure 'nodes' is in dependency array to read latest column values!
   );
 
   // 1. Capture when a node is clicked
@@ -295,7 +423,7 @@ export default function Builder() {
   const handleAddNode = () => {
     const id = `uml-node-${Date.now()}`; // Unique ID using timestamp
 
-    const newNode = {
+    const newNode: UmlNode = {
       id,
       type: 'uml',
       // Start near the center with a minor random offset so they don't stack
@@ -390,7 +518,7 @@ export default function Builder() {
     const id = `zod-node-${Date.now()}`;
 
     // 3. Create the node
-    const newZodSchemaNode = {
+    const newZodSchemaNode: ZodSchemaNode = {
       id,
       type: 'zodSchema',
       position: {
@@ -445,7 +573,7 @@ export default function Builder() {
     const id = `dataclass-node-${Date.now()}`;
 
     // Create the new Data Class node
-    const newDataClassNode = {
+    const newDataClassNode: DataClassNode = {
       id,
       type: 'dataClass',
       // Position it 300 pixels to the right of the DB Table node
