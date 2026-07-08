@@ -14,11 +14,19 @@ export function EditUsersV2Form({ record }: { record: UsersV2 }) {
 
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prevState, formData) => {
-      const res = await updateWithKeys(prevState, formData);
-      if (res.success) {
-        closeRef.current?.click();
+      try {
+        const res = await updateWithKeys(prevState, formData);
+        if (res.success) {
+          closeRef.current?.click();
+        }
+        return res;
+      } catch (error) {
+        console.error('Client Network Error Caught:', error);
+        return {
+          success: false,
+          message: 'Server Error: The uploaded file may exceed the permitted payload size limit, or modifications could not be processed.',
+        };
       }
-      return res;
     },
     { message: null }
   );

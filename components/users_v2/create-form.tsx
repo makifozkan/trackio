@@ -4,7 +4,7 @@ import React, { useActionState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DialogClose } from '@/components/ui/dialog'; // Import DialogClose to close internally
+import { DialogClose } from '@/components/ui/dialog';
 import { createUsersV2Action, ActionState } from '@/app/lib/actions/users_v2-actions';
 
 export function CreateUsersV2Form() {
@@ -12,19 +12,28 @@ export function CreateUsersV2Form() {
 
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     async (prevState, formData) => {
-      const res = await createUsersV2Action(prevState, formData);
-      // If server action succeeded, programmatically click the hidden DialogClose button
-      if (res.success) {
-        closeRef.current?.click();
+      try {
+        // Safe execution try/catch
+        const res = await createUsersV2Action(prevState, formData);
+        if (res.success) {
+          closeRef.current?.click();
+        }
+        return res;
+      } catch (error) {
+        console.error('Client Network Error Caught:', error);
+        
+        // Return a clean, user-friendly 500 error mapping instead of crashing
+        return {
+          success: false,
+          message: 'Server Error: The uploaded file may exceed the permitted payload size limit, or a database timeout occurred.',
+        };
       }
-      return res;
     },
     { message: null }
   );
 
   return (
     <form action={formAction} className="space-y-4 pt-4">
-      {/* Hidden Radix-UI Close controller */}
       <DialogClose ref={closeRef} className="hidden" />
 
       {state?.message && !state.success && (
