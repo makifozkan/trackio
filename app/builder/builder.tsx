@@ -18,6 +18,20 @@ import DbTableNode from './db-table-node';
 import DataClassNode from './data-class-node';
 import { DATA_CLASS_PRESETS, DB_TABLE_PRESETS } from './presets';
 import ZodNode from './zod-node';
+import RelationshipSidebar from './relationship-sidebar';
+
+// ==========================================
+// 6. RELATIONSHIP (EDGE) CUSTOM CONTRACTS
+// ==========================================
+export type RelationType = 'one-to-one' | 'one-to-many' | 'many-to-many';
+
+export type AppEdgeData = {
+  relationType: RelationType;
+};
+
+// Strongly types the React Flow Edge generic payload!
+export type AppEdge = Edge<AppEdgeData>;
+
 // ==========================================
 // 1. Column and Database Node Data Types (Converted to types)
 // ==========================================
@@ -90,6 +104,13 @@ const toPascalCase = (str: string) => {
     .replace(/\s+(.)(\w*)/g, ($1, $2, $3) => $2.toUpperCase() + $3.toLowerCase())
     .replace(/\w/, (s) => s.toUpperCase());
 };
+
+function getPluralName(name: string) {
+  const lower = name.toLowerCase();
+  if (lower.endsWith('y')) return lower.slice(0, -1) + 'ies'; // e.g. Category -> categories
+  if (lower.endsWith('s')) return lower;
+  return lower + 's'; // e.g. Product -> products
+}
 
 const getSingularName = (tableName: string) => {
   const name = tableName.toLowerCase();
@@ -211,10 +232,11 @@ const initialEdges = [
 
 export default function Builder() {
   const [nodes, setNodes] = useState<AppNode[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const [edges, setEdges] = useState<AppEdge[]>(initialEdges);
 
   // Track which node is currently selected
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
 
   const onNodesChange = useCallback(
     (changes: any) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
@@ -236,6 +258,9 @@ export default function Builder() {
             markerEnd: {
               type: MarkerType.ArrowClosed,
               color: '#e28743',
+            },
+            data: {
+              relationType: 'one-to-many',
             },
           },
           eds
@@ -304,9 +329,16 @@ export default function Builder() {
     setSelectedNodeId(node.id);
   }, []);
 
-  // 2. Clear selection when clicking on the empty canvas background
+  // Capture when user clicks an Edge line
+  const onEdgeClick = useCallback((event: any, edge: any) => {
+    setSelectedNodeId(null); // Clear node selection
+    setSelectedEdgeId(edge.id); // Set active edge
+  }, []);
+
+  // Update onPaneClick to clear both
   const onPaneClick = useCallback(() => {
     setSelectedNodeId(null);
+    setSelectedEdgeId(null);
   }, []);
 
   // 3. Update node data from the Sidebar
@@ -545,50 +577,97 @@ export default function Builder() {
     setSelectedNodeId(id);
   };
 
-  const handleAutowireDataClass = (tableNode: any) => {
+  const handleAutowireDataClass = (tableNode: AppNode) => {
+    // 1. Safe Type Guard: Enforce that we are starting from a database table node
+    if (tableNode.type !== 'dbTable') return;
+
     const { tableName, columns } = tableNode.data;
-    if (!tableName) return;
+    if (!tableName || !columns) return;
 
     const pascalName = toPascalCase(tableName);
 
-    // Map SQL Column Types to TypeScript Types
-    const mappedAttributes = columns.map((col: any) => {
-      let tsType = 'string'; // Default fallback
-      const sqlType = col.type.toUpperCase();
+    // 2. Map standard database columns to TS types
+    const mappedAttributes = columns.map((col) => {
+      let tsType = 'string';
+      const type = col.type.toUpperCase();
 
       if (
-        sqlType.includes('INT') ||
-        sqlType.includes('SERIAL') ||
-        sqlType.includes('DECIMAL') ||
-        sqlType.includes('BIGINT')
+        type.includes('INT') ||
+        type.includes('SERIAL') ||
+        type.includes('DECIMAL') ||
+        type.includes('BIGINT')
       ) {
         tsType = 'number';
-      } else if (sqlType.includes('BOOL')) {
+      } else if (type.includes('BOOL')) {
         tsType = 'boolean';
       }
 
-      return `${col.name}: ${tsType}`;
+      const isNullable = !col.isPK && !col.isNotNull;
+      const optionalFlag = isNullable ? '?' : '';
+
+      return `${col.name}${optionalFlag}: ${tsType}`;
+    });
+
+    // =========================================================================
+    // 3. SCAN RELATIONSHIPS (EDGES) WITH ROBUST LABEL FALLBACKS
+    // =========================================================================
+    const relationalAttributes: string[] = [];
+
+    edges.forEach((edge) => {
+      // SMART FALLBACK: If edge.data is missing, evaluate visual label string to support pre-existing edges
+      const relation = edge.data?.relationType;
+
+      // A. Outgoing Relationship (Current table is Parent / Source)
+      if (edge.source === tableNode.id) {
+        const targetNode = nodes.find((n) => n.id === edge.target);
+        if (targetNode && targetNode.type === 'dbTable') {
+          const childTableName = targetNode.data.tableName;
+          const childPascalName = toPascalCase(childTableName); // e.g. "Products"
+
+          if (relation === 'one-to-many') {
+            const childPropertyPlural = getPluralName(childPascalName).toLowerCase();
+            relationalAttributes.push(`${childPropertyPlural}?: ${childPascalName}[]`);
+          } else if (relation === 'one-to-one') {
+            const childPropertySingular = getSingularName(childPascalName).toLowerCase();
+            relationalAttributes.push(`${childPropertySingular}?: ${childPascalName}`);
+          }
+        }
+      }
+
+      // B. Incoming Relationship (Current table is Child / Target)
+      if (edge.target === tableNode.id) {
+        const sourceNode = nodes.find((n) => n.id === edge.source);
+        if (sourceNode && sourceNode.type === 'dbTable') {
+          const parentTableName = sourceNode.data.tableName;
+          const parentPascalName = toPascalCase(parentTableName); // e.g. "UsersV2"
+
+          const parentPropertySingular = getSingularName(parentPascalName).toLowerCase();
+          relationalAttributes.push(`${parentPropertySingular}?: ${parentPascalName}`);
+        }
+      }
     });
 
     const id = `dataclass-node-${Date.now()}`;
 
-    // Create the new Data Class node
-    const newDataClassNode: DataClassNode = {
+    // Combine standard properties with relations
+    const finalAttributes = [...mappedAttributes, ...relationalAttributes];
+
+    // 4. Create the final strongly-typed Data Class Node
+    const newDataClassNode: AppNode = {
       id,
       type: 'dataClass',
-      // Position it 300 pixels to the right of the DB Table node
       position: {
-        x: tableNode.position.x + 300,
+        x: tableNode.position.x + 350,
         y: tableNode.position.y,
       },
       data: {
         name: pascalName,
-        attributes: mappedAttributes,
+        attributes: finalAttributes,
       },
     };
 
     setNodes((nds) => [...nds, newDataClassNode]);
-    setSelectedNodeId(id); // Auto-focus the sidebar on the newly created type
+    setSelectedNodeId(id);
   };
 
   // --- Delete Node Handler ---
@@ -672,6 +751,111 @@ export default function Builder() {
     setSelectedNodeId(id); // Auto-focus sidebar on the spawned table
   };
 
+  // =========================================================================
+  // THE MAGIC CONVERTER: Turns a 1:N line into an N:M Junction Table instantly
+  // =========================================================================
+  const handleConvertToManyToMany = useCallback(
+    (edgeId: string) => {
+      const edge = edges.find((e) => e.id === edgeId);
+      if (!edge) return;
+
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const targetNode = nodes.find((n) => n.id === edge.target);
+
+      if (sourceNode?.type === 'dbTable' && targetNode?.type === 'dbTable') {
+        const sourceName = sourceNode.data.tableName;
+        const targetName = targetNode.data.tableName;
+
+        // 1. Generate clean Junction table structures (e.g. users_projects)
+        const junctionTableName = `${sourceName}_${targetName}`;
+        const junctionNodeId = `db-node-junction-${Date.now()}`;
+
+        // Get primary key details from both tables
+        const sourcePk = sourceNode.data.columns.find((col) => col.isPK);
+        const targetPk = targetNode.data.columns.find((col) => col.isPK);
+
+        const sourcePkType = sourcePk ? sourcePk.type.toUpperCase() : 'INT';
+        const targetPkType = targetPk ? targetPk.type.toUpperCase() : 'INT';
+
+        const sourceSingular = getSingularName(sourceName);
+        const targetSingular = getSingularName(targetName);
+
+        // 2. Set up the junction table columns (Both are foreign keys AND make up a composite Primary Key)
+        const junctionColumns = [
+          {
+            name: `${sourceSingular}_id`,
+            type: sourcePkType === 'SERIAL' ? 'INT' : sourcePkType,
+            isPK: true,
+            isFK: true,
+          },
+          {
+            name: `${targetSingular}_id`,
+            type: targetPkType === 'SERIAL' ? 'INT' : targetPkType,
+            isPK: true,
+            isFK: true,
+          },
+        ];
+
+        const junctionNodePosition = {
+          x: (sourceNode.position.x + targetNode.position.x) / 2, // Placed exactly in the geometric middle!
+          y: (sourceNode.position.y + targetNode.position.y) / 2,
+        };
+
+        const newJunctionNode: AppNode = {
+          id: junctionNodeId,
+          type: 'dbTable',
+          position: junctionNodePosition,
+          data: {
+            tableName: junctionTableName,
+            columns: junctionColumns,
+          },
+        };
+
+        // 3. Remove the old direct edge and draw two new arrows pointing to the junction table!
+        setEdges((currentEdges) => {
+          const filtered = currentEdges.filter((e) => e.id !== edgeId);
+          return [
+            ...filtered,
+            {
+              id: `edge-junc-1-${Date.now()}`,
+              source: sourceNode.id,
+              target: junctionNodeId,
+              label: '1-to-N (One-to-Many)',
+              style: { stroke: '#e28743', strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: '#e28743' },
+            },
+            {
+              id: `edge-junc-2-${Date.now()}`,
+              source: targetNode.id,
+              target: junctionNodeId,
+              label: '1-to-N (One-to-Many)',
+              style: { stroke: '#e28743', strokeWidth: 2 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: '#e28743' },
+            },
+          ];
+        });
+
+        // 4. Inject Junction node, and revert the target table's single FK (clean up user_id from projects)
+        setNodes((currentNodes) => {
+          const filteredNodes = currentNodes.map((node) => {
+            if (node.id === targetNode.id && node.type === 'dbTable') {
+              // Remove the direct FK column (since we are switching to join table)
+              const cleanColumns = node.data.columns.filter(
+                (col) => col.name !== `${sourceSingular}_id`
+              );
+              return { ...node, data: { ...node.data, columns: cleanColumns } };
+            }
+            return node;
+          });
+          return [...filteredNodes, newJunctionNode];
+        });
+
+        setSelectedEdgeId(null); // Close sidebar
+      }
+    },
+    [edges, nodes, setEdges, setNodes]
+  );
+
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
       <div style={{ flexGrow: 1, height: '100%' }}>
@@ -683,6 +867,7 @@ export default function Builder() {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           fitView
         >
@@ -782,6 +967,22 @@ export default function Builder() {
           onAutowireDataClass={handleAutowireDataClass} // <-- Pass it here
           onAutowireZodSchema={handleAutowireZodSchema}
           onClose={() => setSelectedNodeId(null)}
+        />
+      )}
+
+      {selectedEdgeId && (
+        <RelationshipSidebar
+          edge={edges.find((e) => e.id === selectedEdgeId)!}
+          nodes={nodes} // Pass full list to let the editor show "users" -> "products" nicely
+          onUpdate={(id, newData) => {
+            setEdges((eds) => eds.map((e) => (e.id === id ? { ...e, ...newData } : e)));
+          }}
+          onDelete={(id) => {
+            setEdges((eds) => eds.filter((e) => e.id !== id));
+            setSelectedEdgeId(null); // Close panel
+          }}
+          onConvertToManyToMany={handleConvertToManyToMany}
+          onClose={() => setSelectedEdgeId(null)}
         />
       )}
     </div>
