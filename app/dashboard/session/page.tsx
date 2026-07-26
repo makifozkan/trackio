@@ -1,5 +1,5 @@
 import React from 'react';
-import { fetchAllInvoicess } from '@/app/lib/db-handlers/invoices-handlers';
+import { fetchAllSessions } from '@/app/lib/db-handlers/session-handlers';
 import {
   Table,
   TableBody,
@@ -17,18 +17,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CreateInvoicesForm } from '@/components/invoices/create-form';
-import { EditInvoicesForm } from '@/components/invoices/edit-form';
-import DeleteInvoicesButton from '@/components/invoices/delete-dialog';
+import { CreateSessionForm } from '@/components/session/create-form';
+import { EditSessionForm } from '@/components/session/edit-form';
+import DeleteSessionButton from '@/components/session/delete-dialog';
 
-export default async function InvoicesPage() {
-  const records = await fetchAllInvoicess();
+export default async function SessionPage() {
+  const records = await fetchAllSessions();
 
   return (
     <div className="container mx-auto p-6 max-w-6xl space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-2xl font-bold">Manage Invoices</CardTitle>
+          <CardTitle className="text-2xl font-bold">Manage Session</CardTitle>
           
           {/* Uncontrolled Create Dialog - Closes internally via <DialogClose> */}
           <Dialog>
@@ -37,9 +37,9 @@ export default async function InvoicesPage() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Add Invoices Record</DialogTitle>
+                <DialogTitle>Add Session Record</DialogTitle>
               </DialogHeader>
-              <CreateInvoicesForm />
+              <CreateSessionForm />
             </DialogContent>
           </Dialog>
         </CardHeader>
@@ -49,18 +49,17 @@ export default async function InvoicesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead>CUSTOMER ID</TableHead>
-                <TableHead>AMOUNT</TableHead>
-                <TableHead>STATUS</TableHead>
-                <TableHead>DUE DATE</TableHead>
-                <TableHead>USERS V2 ID</TableHead>
+                <TableHead>USER ID</TableHead>
+                <TableHead>SESSION TOKEN</TableHead>
+                <TableHead>EXPIRES</TableHead>
+                <TableHead>USER V2 ID</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {records.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
                     No records found in table.
                   </TableCell>
                 </TableRow>
@@ -68,11 +67,10 @@ export default async function InvoicesPage() {
                 records.map((item: any, idx) => (
                   <TableRow key={idx}>
                   <TableCell>{String(item.id)}</TableCell>
-                  <TableCell>{String(item.customer_id)}</TableCell>
-                  <TableCell>{String(item.amount)}</TableCell>
-                  <TableCell>{String(item.status)}</TableCell>
-                  <TableCell>{String(item.due_date)}</TableCell>
-                  <TableCell>{String(item.users_v2_id)}</TableCell>
+                  <TableCell>{String(item.user_id)}</TableCell>
+                  <TableCell>{String(item.session_token)}</TableCell>
+                  <TableCell>{String(item.expires)}</TableCell>
+                  <TableCell>{String(item.user_v2_id)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2 items-center">
                         
@@ -85,13 +83,13 @@ export default async function InvoicesPage() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
-                              <DialogTitle>Edit Invoices Record</DialogTitle>
+                              <DialogTitle>Edit Session Record</DialogTitle>
                             </DialogHeader>
-                            <EditInvoicesForm record={item} />
+                            <EditSessionForm record={item} />
                           </DialogContent>
                         </Dialog>
 
-                        <DeleteInvoicesButton id={item.id} />
+                        <DeleteSessionButton id={item.id} />
                       </div>
                     </TableCell>
                   </TableRow>

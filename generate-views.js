@@ -296,7 +296,7 @@ export default function Delete${pascalName}Button({ ${pks.map((pk) => pk.name).j
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this record from the "${tableName}" table.
+            This action cannot be undone. This will permanently delete this record from the &quot;${tableName}&quot; table.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

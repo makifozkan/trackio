@@ -19,6 +19,8 @@ const links = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Builder', href: '/builder', icon: Cog6ToothIcon },
   { name: 'Ideas', href: '/dashboard/ideas', icon: LightBulbIcon },
+  { name: 'Invoice', href: '/dashboard/invoice', icon: DocumentDuplicateIcon },
+  { name: 'User V2', href: '/dashboard/user_v2', icon: DocumentDuplicateIcon },
   { name: 'Invoices', href: '/dashboard/invoices', icon: DocumentDuplicateIcon },
   { name: 'Projects', href: '/dashboard/projects', icon: Square3Stack3DIcon },
   { name: 'Customers', href: '/dashboard/customers', icon: UserGroupIcon },

@@ -2,6 +2,9 @@ import bcrypt from 'bcrypt';
 import postgres from 'postgres';
 import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 import { createUsersV2Table } from '../lib/db-schemas/create-users-v2-table';
+import { createInvoicesTable } from '../lib/db-schemas/create-invoices-table';
+import { createUserV2Table } from '../lib/db-schemas/create-user-v2-table';
+import { createInvoiceTable } from '../lib/db-schemas/create-invoice-table';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -222,7 +225,8 @@ export async function GET() {
       // seedIdeas(),
       // seedProject(),
       // seedTasks(),
-      createUsersV2Table(),
+      createUserV2Table(),
+      createInvoiceTable(),
     ]);
 
     return Response.json({ message: 'Database seeded successfully' });

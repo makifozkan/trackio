@@ -40,7 +40,7 @@ export const DATA_CLASS_PRESETS = {
 
 export const DB_TABLE_PRESETS = {
   users: {
-    tableName: 'users',
+    tableName: 'user',
     columns: [
       { name: 'id', type: 'SERIAL', isPK: true },
       { name: 'name', type: 'VARCHAR(255)' },
@@ -50,7 +50,7 @@ export const DB_TABLE_PRESETS = {
     ],
   },
   sessions: {
-    tableName: 'sessions',
+    tableName: 'session',
     columns: [
       { name: 'id', type: 'UUID', isPK: true },
       { name: 'user_id', type: 'UUID', isFK: true },
@@ -59,7 +59,7 @@ export const DB_TABLE_PRESETS = {
     ],
   },
   products: {
-    tableName: 'products',
+    tableName: 'product',
     columns: [
       { name: 'id', type: 'SERIAL', isPK: true },
       { name: 'sku', type: 'VARCHAR(255)' },
@@ -69,7 +69,7 @@ export const DB_TABLE_PRESETS = {
     ],
   },
   invoices: {
-    tableName: 'invoices',
+    tableName: 'invoice',
     columns: [
       { name: 'id', type: 'SERIAL', isPK: true },
       { name: 'customer_id', type: 'INT', isFK: true },
@@ -79,7 +79,7 @@ export const DB_TABLE_PRESETS = {
     ],
   },
   users_v2: {
-    tableName: 'users_v2',
+    tableName: 'user_v2',
     columns: [
       { name: 'id', type: 'UUID', isPK: true, defaultValue: 'uuid_generate_v4()' },
       { name: 'name', type: 'VARCHAR(255)', isNotNull: true },

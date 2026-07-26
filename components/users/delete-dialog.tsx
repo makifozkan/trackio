@@ -13,18 +13,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { deleteUsersV2Action } from '@/app/lib/actions/users_v2-actions';
+import { deleteUsersAction } from '@/app/lib/actions/users-actions';
 
 interface DeleteProps {
   id: any;
 }
 
-export default function DeleteUsersV2Button({ id }: DeleteProps) {
+export default function DeleteUsersButton({ id }: DeleteProps) {
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
     startTransition(async () => {
-      await deleteUsersV2Action(id);
+      await deleteUsersAction(id);
     });
   };
 
@@ -48,7 +48,7 @@ export default function DeleteUsersV2Button({ id }: DeleteProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this record from the &quot;users_v2&quot; table.
+            This action cannot be undone. This will permanently delete this record from the &quot;users&quot; table.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

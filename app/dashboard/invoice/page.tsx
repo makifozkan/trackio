@@ -1,5 +1,5 @@
 import React from 'react';
-import { fetchAllInvoicess } from '@/app/lib/db-handlers/invoices-handlers';
+import { fetchAllInvoices } from '@/app/lib/db-handlers/invoice-handlers';
 import {
   Table,
   TableBody,
@@ -17,18 +17,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { CreateInvoicesForm } from '@/components/invoices/create-form';
-import { EditInvoicesForm } from '@/components/invoices/edit-form';
-import DeleteInvoicesButton from '@/components/invoices/delete-dialog';
+import { CreateInvoiceForm } from '@/components/invoice/create-form';
+import { EditInvoiceForm } from '@/components/invoice/edit-form';
+import DeleteInvoiceButton from '@/components/invoice/delete-dialog';
 
-export default async function InvoicesPage() {
-  const records = await fetchAllInvoicess();
+export default async function InvoicePage() {
+  const records = await fetchAllInvoices();
 
   return (
     <div className="container mx-auto p-6 max-w-6xl space-y-6">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-2xl font-bold">Manage Invoices</CardTitle>
+          <CardTitle className="text-2xl font-bold">Manage Invoice</CardTitle>
           
           {/* Uncontrolled Create Dialog - Closes internally via <DialogClose> */}
           <Dialog>
@@ -37,9 +37,9 @@ export default async function InvoicesPage() {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Add Invoices Record</DialogTitle>
+                <DialogTitle>Add Invoice Record</DialogTitle>
               </DialogHeader>
-              <CreateInvoicesForm />
+              <CreateInvoiceForm />
             </DialogContent>
           </Dialog>
         </CardHeader>
@@ -53,7 +53,7 @@ export default async function InvoicesPage() {
                 <TableHead>AMOUNT</TableHead>
                 <TableHead>STATUS</TableHead>
                 <TableHead>DUE DATE</TableHead>
-                <TableHead>USERS V2 ID</TableHead>
+                <TableHead>USER V2 ID</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -72,7 +72,7 @@ export default async function InvoicesPage() {
                   <TableCell>{String(item.amount)}</TableCell>
                   <TableCell>{String(item.status)}</TableCell>
                   <TableCell>{String(item.due_date)}</TableCell>
-                  <TableCell>{String(item.users_v2_id)}</TableCell>
+                  <TableCell>{String(item.user_v2_id)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2 items-center">
                         
@@ -85,13 +85,13 @@ export default async function InvoicesPage() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
-                              <DialogTitle>Edit Invoices Record</DialogTitle>
+                              <DialogTitle>Edit Invoice Record</DialogTitle>
                             </DialogHeader>
-                            <EditInvoicesForm record={item} />
+                            <EditInvoiceForm record={item} />
                           </DialogContent>
                         </Dialog>
 
-                        <DeleteInvoicesButton id={item.id} />
+                        <DeleteInvoiceButton id={item.id} />
                       </div>
                     </TableCell>
                   </TableRow>

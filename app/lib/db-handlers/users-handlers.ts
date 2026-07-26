@@ -1,24 +1,24 @@
 import { sql } from '../db';
-import { UsersV2 } from '../types/UsersV2'; // Import central type from generate-types.js
+import { Users } from '../types/Users'; // Import central type from generate-types.js
 
-export type UsersV2Include = 'invoices';
+export type UsersInclude = 'invoices';
 
-export interface UsersV2FetchOptions {
-  include?: UsersV2Include[];
+export interface UsersFetchOptions {
+  include?: UsersInclude[];
 }
 
 /**
  * FETCH ALL RECORDS
  */
-export async function fetchAllUsersV2s(): Promise<UsersV2[]> {
+export async function fetchAllUserss(): Promise<Users[]> {
   try {
     const data = (await sql`
       SELECT id, name, email, image, created_at
-      FROM users_v2
-    `) as unknown as UsersV2[];
+      FROM users
+    `) as unknown as Users[];
     return data;
   } catch (error) {
-    console.error('Database Error: Failed to fetch users_v2 records.', error);
+    console.error('Database Error: Failed to fetch users records.', error);
     throw new Error('Could not retrieve data. Please try again later.');
   }
 }
@@ -26,7 +26,7 @@ export async function fetchAllUsersV2s(): Promise<UsersV2[]> {
 /**
  * FETCH SINGLE RECORD BY PRIMARY KEY(S) (With optional high-performance eager sub-joins)
  */
-export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): Promise<UsersV2 | null> {
+export async function fetchUsersById(id: any, options?: UsersFetchOptions): Promise<Users | null> {
   try {
     // Array of standard table column select fragments
     const selectFields = [
@@ -41,9 +41,9 @@ export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): 
     if (options?.include) {
     if (options?.include?.includes('invoices')) {
       selectFields.push(sql`(
-        SELECT COALESCE(json_agg(json_build_object('id', r.id, 'customer_id', r.customer_id, 'amount', r.amount, 'status', r.status, 'due_date', r.due_date, 'users_v2_id', r.users_v2_id)), '[]'::json)
+        SELECT COALESCE(json_agg(json_build_object('id', r.id, 'customer_id', r.customer_id, 'amount', r.amount, 'status', r.status, 'due_date', r.due_date, 'user_id', r.user_id)), '[]'::json)
         FROM invoices r
-        WHERE r.users_v2_id = t.id
+        WHERE r.user_id = t.id
       ) as invoices`);
     }
     }
@@ -51,13 +51,13 @@ export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): 
     // Execute exactly one single database roundtrip!
     const data = (await sql`
       SELECT ${selectFields}
-      FROM users_v2 t
+      FROM users t
       WHERE t.id = ${id}
-    `) as unknown as UsersV2[];
+    `) as unknown as Users[];
     
     return data[0] || null;
   } catch (error) {
-    console.error(`Database Error: Failed to fetch users_v2 with key(s): `, { id }, error);
+    console.error(`Database Error: Failed to fetch users with key(s): `, { id }, error);
     throw new Error('Could not retrieve record.');
   }
 }
@@ -65,16 +65,16 @@ export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): 
 /**
  * CREATE NEW RECORD
  */
-export async function createUsersV2(data: Omit<UsersV2, 'id'>): Promise<UsersV2> {
+export async function createUsers(data: Omit<Users, 'id'>): Promise<Users> {
   try {
     const result = (await sql`
-      INSERT INTO users_v2 (name, email, image)
-      VALUES (${data.name ?? null}, ${data.email ?? null}, ${data.image ?? null})
+      INSERT INTO users (name, email, image, created_at)
+      VALUES (${data.name ?? null}, ${data.email ?? null}, ${data.image ?? null}, ${data.created_at ?? null})
       RETURNING id, name, email, image, created_at
-    `) as unknown as UsersV2[];
+    `) as unknown as Users[];
     return result[0];
   } catch (error) {
-    console.error('Database Error: Failed to create users_v2 record.', error);
+    console.error('Database Error: Failed to create users record.', error);
     throw new Error('Could not create record.');
   }
 }
@@ -82,30 +82,30 @@ export async function createUsersV2(data: Omit<UsersV2, 'id'>): Promise<UsersV2>
 /**
  * UPDATE EXISTING RECORD (SAFE PARTIAL UPDATE)
  */
-export async function updateUsersV2(id: any, data: Partial<Omit<UsersV2, 'id'>>): Promise<UsersV2> {
+export async function updateUsers(id: any, data: Partial<Omit<Users, 'id'>>): Promise<Users> {
   try {
     // If the payload is empty, skip database execution and return the current record
     if (Object.keys(data).length === 0) {
-      return (await fetchUsersV2ById(id))!;
+      return (await fetchUsersById(id))!;
     }
 
     // Dynamically filter allowed update keys to exclude any that are undefined
-    const allowedKeys = ['name', 'email', 'image'];
+    const allowedKeys = ['name', 'email', 'image', 'created_at'];
     const keysToUpdate = allowedKeys.filter((key) => (data as any)[key] !== undefined);
 
     // Resolve column helper using only valid keys
     const updateColumns = sql(data, ...(keysToUpdate as any[])) as any;
 
     const result = (await sql`
-      UPDATE users_v2
+      UPDATE users
       SET ${updateColumns}
       WHERE id = ${id}
       RETURNING id, name, email, image, created_at
-    `) as unknown as UsersV2[];
+    `) as unknown as Users[];
 
     return result[0];
   } catch (error) {
-    console.error(`Database Error: Failed to update users_v2 with key(s): `, { id }, error);
+    console.error(`Database Error: Failed to update users with key(s): `, { id }, error);
     throw new Error('Could not update record.');
   }
 }
@@ -113,15 +113,15 @@ export async function updateUsersV2(id: any, data: Partial<Omit<UsersV2, 'id'>>)
 /**
  * DELETE RECORD
  */
-export async function deleteUsersV2(id: any): Promise<{ success: boolean }> {
+export async function deleteUsers(id: any): Promise<{ success: boolean }> {
   try {
     await sql`
-      DELETE FROM users_v2
+      DELETE FROM users
       WHERE id = ${id}
     `;
     return { success: true };
   } catch (error) {
-    console.error(`Database Error: Failed to delete users_v2 with key(s): `, { id }, error);
+    console.error(`Database Error: Failed to delete users with key(s): `, { id }, error);
     throw new Error('Could not delete record.');
   }
 }

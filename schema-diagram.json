@@ -1,14 +1,14 @@
 {
   "nodes": [
     {
-      "id": "db-node-1783497342198",
+      "id": "db-node-1785074648152",
       "type": "dbTable",
       "position": {
-        "x": 186.52857272969595,
-        "y": 139.00526531483348
+        "x": 183.0294181135042,
+        "y": 151.61460468965112
       },
       "data": {
-        "tableName": "users_v2",
+        "tableName": "user_v2",
         "columns": [
           {
             "name": "id",
@@ -45,38 +45,85 @@
       "selected": false
     },
     {
-      "id": "dataclass-node-1783497343867",
-      "type": "dataClass",
+      "id": "db-node-1785074649620",
+      "type": "dbTable",
       "position": {
-        "x": 420.02857272969595,
-        "y": 160.00526531483348
+        "x": 148.98406536878548,
+        "y": 485.5814858654785
       },
       "data": {
-        "name": "UsersV2",
-        "attributes": [
-          "id: string",
-          "name: string",
-          "email: string",
-          "image: string",
-          "created_at: string"
+        "tableName": "invoice",
+        "columns": [
+          {
+            "name": "id",
+            "type": "SERIAL",
+            "isPK": true
+          },
+          {
+            "name": "customer_id",
+            "type": "INT",
+            "isFK": true
+          },
+          {
+            "name": "amount",
+            "type": "DECIMAL"
+          },
+          {
+            "name": "status",
+            "type": "VARCHAR(255)"
+          },
+          {
+            "name": "due_date",
+            "type": "DATE"
+          },
+          {
+            "name": "user_v2_id",
+            "type": "UUID",
+            "isFK": true,
+            "isNotNull": false,
+            "defaultValue": ""
+          }
         ]
       },
       "measured": {
-        "width": 180,
-        "height": 166
+        "width": 200,
+        "height": 213
       },
       "selected": false,
       "dragging": false
     },
     {
-      "id": "zod-node-1783497345693",
-      "type": "zodSchema",
+      "id": "dataclass-node-1785074659127",
+      "type": "dataClass",
       "position": {
-        "x": 106.42708183290534,
-        "y": -141.37725957565823
+        "x": 533.0294181135042,
+        "y": 151.61460468965112
       },
       "data": {
-        "name": "UsersV2Schema",
+        "name": "UserV2",
+        "attributes": [
+          "id: string",
+          "name: string",
+          "email: string",
+          "image?: string",
+          "created_at: string",
+          "invoices?: Invoice[]"
+        ]
+      },
+      "measured": {
+        "width": 180,
+        "height": 188
+      }
+    },
+    {
+      "id": "zod-node-1785074660555",
+      "type": "zodSchema",
+      "position": {
+        "x": 533.0294181135042,
+        "y": 251.61460468965112
+      },
+      "data": {
+        "name": "UserV2Schema",
         "fields": [
           {
             "name": "id",
@@ -101,11 +148,11 @@
         ],
         "operations": [
           {
-            "name": "CreateUsersV2",
+            "name": "CreateUserV2",
             "omitFields": ["id", "created_at"]
           },
           {
-            "name": "UpdateUsersV2",
+            "name": "UpdateUserV2",
             "omitFields": ["id"]
           }
         ]
@@ -114,8 +161,82 @@
         "width": 673,
         "height": 247
       },
-      "selected": true,
-      "dragging": false
+      "selected": false
+    },
+    {
+      "id": "dataclass-node-1785074667407",
+      "type": "dataClass",
+      "position": {
+        "x": 498.9840653687855,
+        "y": 485.5814858654785
+      },
+      "data": {
+        "name": "Invoice",
+        "attributes": [
+          "id: number",
+          "customer_id?: number",
+          "amount?: number",
+          "status?: string",
+          "due_date?: string",
+          "user_v2_id?: string",
+          "userv2?: UserV2"
+        ]
+      },
+      "measured": {
+        "width": 180,
+        "height": 210
+      }
+    },
+    {
+      "id": "zod-node-1785074669106",
+      "type": "zodSchema",
+      "position": {
+        "x": 498.9840653687855,
+        "y": 585.5814858654785
+      },
+      "data": {
+        "name": "InvoiceSchema",
+        "fields": [
+          {
+            "name": "id",
+            "validation": "z.coerce.number().optional()"
+          },
+          {
+            "name": "customer_id",
+            "validation": "z.coerce.number().nullable().optional()"
+          },
+          {
+            "name": "amount",
+            "validation": "z.coerce.number().nullable().optional()"
+          },
+          {
+            "name": "status",
+            "validation": "z.string().nullable().optional()"
+          },
+          {
+            "name": "due_date",
+            "validation": "z.string().nullable().optional()"
+          },
+          {
+            "name": "user_v2_id",
+            "validation": "z.string().nullable().optional()"
+          }
+        ],
+        "operations": [
+          {
+            "name": "CreateInvoice",
+            "omitFields": ["id"]
+          },
+          {
+            "name": "UpdateInvoice",
+            "omitFields": ["id"]
+          }
+        ]
+      },
+      "measured": {
+        "width": 335,
+        "height": 268
+      }
     }
   ],
   "edges": [
@@ -127,6 +248,23 @@
         "type": "arrowclosed",
         "color": "#333"
       }
+    },
+    {
+      "source": "db-node-1785074648152",
+      "target": "db-node-1785074649620",
+      "label": "1-to-N (One-to-Many)",
+      "style": {
+        "stroke": "#e28743",
+        "strokeWidth": 2
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#e28743"
+      },
+      "data": {
+        "relationType": "one-to-many"
+      },
+      "id": "xy-edge__db-node-1785074648152-db-node-1785074649620"
     }
   ]
 }
