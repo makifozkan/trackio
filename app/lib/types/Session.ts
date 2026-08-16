@@ -1,3 +1,5 @@
+import { UserV2 } from './UserV2';
+
 export type Session = {
   id: string;
   user_id?: string;

@@ -1,3 +1,5 @@
+import { Invoice } from '../definitions';
+
 export type UserV2 = {
   id: string;
   name: string;

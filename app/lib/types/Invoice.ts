@@ -1,3 +1,5 @@
+import { UserV2 } from './UserV2';
+
 export type Invoice = {
   id: number;
   customer_id?: number;

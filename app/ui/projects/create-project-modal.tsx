@@ -25,8 +25,8 @@ export default function CreateProjectModal({
   project,
   ideas,
 }: {
-  project: Project | null;
-  ideas: Idea[];
+  project?: Project | null;
+  ideas?: Idea[];
 }) {
   const initialState = { message: '', errors: {} };
   const [state, formAction] = useActionState(createProject, initialState);
@@ -83,7 +83,7 @@ export default function CreateProjectModal({
 
   const autoGenerateHierarchy = async () => {
     const generatedTasks = await generateProjectPlan(
-      ideas.find((i) => i.id === selectedIdeaId)?.title || ''
+      ideas?.find((i) => i.id === selectedIdeaId)?.title || ''
     );
     if (generatedTasks) {
       console.log('Generated tasks from Gemini:', generatedTasks);
@@ -135,7 +135,7 @@ export default function CreateProjectModal({
               onChange={(e) => setSelectedIdeaId(e.target.value)}
               className="w-full bg-none appearance-none bg-slate-100 border-none rounded-xl px-4 py-3.5 font-medium text-slate-700 focus:ring-2 focus:ring-sky-500/20 cursor-pointer"
             >
-              {ideas.map((idea) => (
+              {ideas?.map((idea) => (
                 <option key={idea.id} value={idea.id}>
                   {idea.title}
                 </option>
