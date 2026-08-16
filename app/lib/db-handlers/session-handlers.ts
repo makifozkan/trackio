@@ -26,7 +26,10 @@ export async function fetchAllSessions(): Promise<Session[]> {
 /**
  * FETCH SINGLE RECORD BY PRIMARY KEY(S) (With optional high-performance eager sub-joins)
  */
-export async function fetchSessionById(id: any, options?: SessionFetchOptions): Promise<Session | null> {
+export async function fetchSessionById(
+  id: any,
+  options?: SessionFetchOptions
+): Promise<Session | null> {
   try {
     // Array of standard table column select fragments
     const selectFields = [
@@ -34,19 +37,19 @@ export async function fetchSessionById(id: any, options?: SessionFetchOptions): 
       sql`t.user_id`,
       sql`t.session_token`,
       sql`t.expires`,
-      sql`t.user_v2_id`
+      sql`t.user_v2_id`,
     ] as any[];
 
     // Push relational aggregates dynamically into the SELECT clause
     if (options?.include) {
-    if (options?.include?.includes('user_v2')) {
-      selectFields.push(sql`(
+      if (options?.include?.includes('user_v2')) {
+        selectFields.push(sql`(
         SELECT json_build_object('id', r.id, 'name', r.name, 'email', r.email, 'image', r.image, 'created_at', r.created_at)
         FROM user_v2 r
         WHERE r.id = t.user_v2_id
         LIMIT 1
       ) as user_v2`);
-    }
+      }
     }
 
     // Execute exactly one single database roundtrip!
@@ -55,7 +58,7 @@ export async function fetchSessionById(id: any, options?: SessionFetchOptions): 
       FROM session t
       WHERE t.id = ${id}
     `) as unknown as Session[];
-    
+
     return data[0] || null;
   } catch (error) {
     console.error(`Database Error: Failed to fetch session with key(s): `, { id }, error);

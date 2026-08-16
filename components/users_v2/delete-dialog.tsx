@@ -31,13 +31,13 @@ export default function DeleteUsersV2Button({ id }: DeleteProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button 
+        <button
           style={{
             padding: '6px',
             background: 'transparent',
             border: 'none',
             color: '#dc2626',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
           title="Delete record"
         >
@@ -48,13 +48,14 @@ export default function DeleteUsersV2Button({ id }: DeleteProps) {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this record from the &quot;users_v2&quot; table.
+            This action cannot be undone. This will permanently delete this record from the
+            &quot;users_v2&quot; table.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleDelete} 
+          <AlertDialogAction
+            onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             disabled={isPending}
           >

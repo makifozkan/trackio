@@ -16,4 +16,3 @@ export type CreateUsersType = z.infer<typeof CreateUsers>;
 
 export const UpdateUsers = UsersSchema.omit({ id: true });
 export type UpdateUsersType = z.infer<typeof UpdateUsers>;
-

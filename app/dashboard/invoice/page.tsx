@@ -29,7 +29,7 @@ export default async function InvoicePage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Manage Invoice</CardTitle>
-          
+
           {/* Uncontrolled Create Dialog - Closes internally via <DialogClose> */}
           <Dialog>
             <DialogTrigger asChild>
@@ -43,7 +43,7 @@ export default async function InvoicePage() {
             </DialogContent>
           </Dialog>
         </CardHeader>
-        
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -67,15 +67,14 @@ export default async function InvoicePage() {
               ) : (
                 records.map((item: any, idx) => (
                   <TableRow key={idx}>
-                  <TableCell>{String(item.id)}</TableCell>
-                  <TableCell>{String(item.customer_id)}</TableCell>
-                  <TableCell>{String(item.amount)}</TableCell>
-                  <TableCell>{String(item.status)}</TableCell>
-                  <TableCell>{String(item.due_date)}</TableCell>
-                  <TableCell>{String(item.user_v2_id)}</TableCell>
+                    <TableCell>{String(item.id)}</TableCell>
+                    <TableCell>{String(item.customer_id)}</TableCell>
+                    <TableCell>{String(item.amount)}</TableCell>
+                    <TableCell>{String(item.status)}</TableCell>
+                    <TableCell>{String(item.due_date)}</TableCell>
+                    <TableCell>{String(item.user_v2_id)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2 items-center">
-                        
                         {/* Uncontrolled Edit Dialog - Closes internally via <DialogClose> */}
                         <Dialog>
                           <DialogTrigger asChild>

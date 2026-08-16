@@ -29,7 +29,7 @@ export default async function UserV2Page() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-2xl font-bold">Manage UserV2</CardTitle>
-          
+
           {/* Uncontrolled Create Dialog - Closes internally via <DialogClose> */}
           <Dialog>
             <DialogTrigger asChild>
@@ -43,7 +43,7 @@ export default async function UserV2Page() {
             </DialogContent>
           </Dialog>
         </CardHeader>
-        
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -66,20 +66,23 @@ export default async function UserV2Page() {
               ) : (
                 records.map((item: any, idx) => (
                   <TableRow key={idx}>
-                  <TableCell>{String(item.id)}</TableCell>
-                  <TableCell>{String(item.name)}</TableCell>
-                  <TableCell>{String(item.email)}</TableCell>
-                  <TableCell>
-                    {item.image ? (
-                      <img src={String(item.image)} alt="Thumbnail" className="h-10 w-10 object-cover rounded border" />
-                    ) : (
-                      <span className="text-muted-foreground text-xs">No image</span>
-                    )}
-                  </TableCell>
-                  <TableCell>{String(item.created_at)}</TableCell>
+                    <TableCell>{String(item.id)}</TableCell>
+                    <TableCell>{String(item.name)}</TableCell>
+                    <TableCell>{String(item.email)}</TableCell>
+                    <TableCell>
+                      {item.image ? (
+                        <img
+                          src={String(item.image)}
+                          alt="Thumbnail"
+                          className="h-10 w-10 object-cover rounded border"
+                        />
+                      ) : (
+                        <span className="text-muted-foreground text-xs">No image</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{String(item.created_at)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2 items-center">
-                        
                         {/* Uncontrolled Edit Dialog - Closes internally via <DialogClose> */}
                         <Dialog>
                           <DialogTrigger asChild>

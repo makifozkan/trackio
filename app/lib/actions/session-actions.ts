@@ -14,13 +14,12 @@ export type ActionState = {
  * CREATE ACTION
  */
 export async function createSessionAction(
-  prevState: ActionState, 
+  prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = { ...Object.fromEntries(formData.entries()) };
 
   // Convert File binary uploads into valid base64 strings securely on the server
-  
 
   // Validate inputs with Zod
   const validatedFields = CreateSession.safeParse(rawFields);
@@ -56,13 +55,12 @@ export async function createSessionAction(
  */
 export async function updateSessionAction(
   id: any,
-  prevState: ActionState, 
+  prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = { ...Object.fromEntries(formData.entries()) };
 
   // Convert File binary uploads into base64 strings during modifications
-  
 
   const validatedFields = UpdateSession.safeParse(rawFields);
 

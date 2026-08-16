@@ -21,11 +21,12 @@ export function CreateUsersV2Form() {
         return res;
       } catch (error) {
         console.error('Client Network Error Caught:', error);
-        
+
         // Return a clean, user-friendly 500 error mapping instead of crashing
         return {
           success: false,
-          message: 'Server Error: The uploaded file may exceed the permitted payload size limit, or a database timeout occurred.',
+          message:
+            'Server Error: The uploaded file may exceed the permitted payload size limit, or a database timeout occurred.',
         };
       }
     },
@@ -37,32 +38,32 @@ export function CreateUsersV2Form() {
       <DialogClose ref={closeRef} className="hidden" />
 
       {state?.message && !state.success && (
-        <div className="p-3 bg-destructive/15 text-destructive rounded-md text-sm">{state.message}</div>
+        <div className="p-3 bg-destructive/15 text-destructive rounded-md text-sm">
+          {state.message}
+        </div>
       )}
-      
-        <div className="space-y-2">
-          <Label htmlFor="name">NAME</Label>
-          <Input id="name" name="name" type="text" placeholder="Enter name" />
-          {state?.errors?.name && (
-            <p className="text-xs text-destructive">{state.errors.name[0]}</p>
-          )}
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">EMAIL</Label>
-          <Input id="email" name="email" type="text" placeholder="Enter email" />
-          {state?.errors?.email && (
-            <p className="text-xs text-destructive">{state.errors.email[0]}</p>
-          )}
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="name">NAME</Label>
+        <Input id="name" name="name" type="text" placeholder="Enter name" />
+        {state?.errors?.name && <p className="text-xs text-destructive">{state.errors.name[0]}</p>}
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="image">IMAGE</Label>
-          <Input id="image" name="image" type="file" accept="image/*" />
-          {state?.errors?.image && (
-            <p className="text-xs text-destructive">{state.errors.image[0]}</p>
-          )}
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="email">EMAIL</Label>
+        <Input id="email" name="email" type="text" placeholder="Enter email" />
+        {state?.errors?.email && (
+          <p className="text-xs text-destructive">{state.errors.email[0]}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="image">IMAGE</Label>
+        <Input id="image" name="image" type="file" accept="image/*" />
+        {state?.errors?.image && (
+          <p className="text-xs text-destructive">{state.errors.image[0]}</p>
+        )}
+      </div>
 
       <Button type="submit" className="w-full" disabled={isPending}>
         {isPending ? 'Saving...' : 'Create UsersV2'}

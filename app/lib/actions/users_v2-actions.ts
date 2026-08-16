@@ -14,13 +14,13 @@ export type ActionState = {
  * CREATE ACTION
  */
 export async function createUsersV2Action(
-  prevState: ActionState, 
+  prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = { ...Object.fromEntries(formData.entries()) };
 
   // Convert File binary uploads into valid base64 strings securely on the server
-  
+
   const imageFile = formData.get('image');
   if (imageFile instanceof File && imageFile.size > 0) {
     const buffer = Buffer.from(await imageFile.arrayBuffer());
@@ -64,13 +64,13 @@ export async function createUsersV2Action(
  */
 export async function updateUsersV2Action(
   id: any,
-  prevState: ActionState, 
+  prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = { ...Object.fromEntries(formData.entries()) };
 
   // Convert File binary uploads into base64 strings during modifications
-  
+
   const imageFile = formData.get('image');
   if (imageFile instanceof File && imageFile.size > 0) {
     const buffer = Buffer.from(await imageFile.arrayBuffer());

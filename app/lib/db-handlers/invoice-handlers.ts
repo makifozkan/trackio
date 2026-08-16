@@ -26,7 +26,10 @@ export async function fetchAllInvoices(): Promise<Invoice[]> {
 /**
  * FETCH SINGLE RECORD BY PRIMARY KEY(S) (With optional high-performance eager sub-joins)
  */
-export async function fetchInvoiceById(id: any, options?: InvoiceFetchOptions): Promise<Invoice | null> {
+export async function fetchInvoiceById(
+  id: any,
+  options?: InvoiceFetchOptions
+): Promise<Invoice | null> {
   try {
     // Array of standard table column select fragments
     const selectFields = [
@@ -35,19 +38,19 @@ export async function fetchInvoiceById(id: any, options?: InvoiceFetchOptions): 
       sql`t.amount`,
       sql`t.status`,
       sql`t.due_date`,
-      sql`t.user_v2_id`
+      sql`t.user_v2_id`,
     ] as any[];
 
     // Push relational aggregates dynamically into the SELECT clause
     if (options?.include) {
-    if (options?.include?.includes('user_v2')) {
-      selectFields.push(sql`(
+      if (options?.include?.includes('user_v2')) {
+        selectFields.push(sql`(
         SELECT json_build_object('id', r.id, 'name', r.name, 'email', r.email, 'image', r.image, 'created_at', r.created_at)
         FROM user_v2 r
         WHERE r.id = t.user_v2_id
         LIMIT 1
       ) as user_v2`);
-    }
+      }
     }
 
     // Execute exactly one single database roundtrip!
@@ -56,7 +59,7 @@ export async function fetchInvoiceById(id: any, options?: InvoiceFetchOptions): 
       FROM invoice t
       WHERE t.id = ${id}
     `) as unknown as Invoice[];
-    
+
     return data[0] || null;
   } catch (error) {
     console.error(`Database Error: Failed to fetch invoice with key(s): `, { id }, error);

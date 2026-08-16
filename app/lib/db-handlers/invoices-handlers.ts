@@ -26,7 +26,10 @@ export async function fetchAllInvoicess(): Promise<Invoices[]> {
 /**
  * FETCH SINGLE RECORD BY PRIMARY KEY(S) (With optional high-performance eager sub-joins)
  */
-export async function fetchInvoicesById(id: any, options?: InvoicesFetchOptions): Promise<Invoices | null> {
+export async function fetchInvoicesById(
+  id: any,
+  options?: InvoicesFetchOptions
+): Promise<Invoices | null> {
   try {
     // Array of standard table column select fragments
     const selectFields = [
@@ -35,19 +38,19 @@ export async function fetchInvoicesById(id: any, options?: InvoicesFetchOptions)
       sql`t.amount`,
       sql`t.status`,
       sql`t.due_date`,
-      sql`t.users_v2_id`
+      sql`t.users_v2_id`,
     ] as any[];
 
     // Push relational aggregates dynamically into the SELECT clause
     if (options?.include) {
-    if (options?.include?.includes('users_v2')) {
-      selectFields.push(sql`(
+      if (options?.include?.includes('users_v2')) {
+        selectFields.push(sql`(
         SELECT json_build_object('id', r.id, 'name', r.name, 'email', r.email, 'image', r.image, 'created_at', r.created_at)
         FROM users_v2 r
         WHERE r.id = t.users_v2_id
         LIMIT 1
       ) as users_v2`);
-    }
+      }
     }
 
     // Execute exactly one single database roundtrip!
@@ -56,7 +59,7 @@ export async function fetchInvoicesById(id: any, options?: InvoicesFetchOptions)
       FROM invoices t
       WHERE t.id = ${id}
     `) as unknown as Invoices[];
-    
+
     return data[0] || null;
   } catch (error) {
     console.error(`Database Error: Failed to fetch invoices with key(s): `, { id }, error);
@@ -84,7 +87,10 @@ export async function createInvoices(data: Omit<Invoices, 'id'>): Promise<Invoic
 /**
  * UPDATE EXISTING RECORD (SAFE PARTIAL UPDATE)
  */
-export async function updateInvoices(id: any, data: Partial<Omit<Invoices, 'id'>>): Promise<Invoices> {
+export async function updateInvoices(
+  id: any,
+  data: Partial<Omit<Invoices, 'id'>>
+): Promise<Invoices> {
   try {
     // If the payload is empty, skip database execution and return the current record
     if (Object.keys(data).length === 0) {

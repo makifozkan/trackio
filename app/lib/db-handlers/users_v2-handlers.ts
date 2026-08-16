@@ -26,7 +26,10 @@ export async function fetchAllUsersV2s(): Promise<UsersV2[]> {
 /**
  * FETCH SINGLE RECORD BY PRIMARY KEY(S) (With optional high-performance eager sub-joins)
  */
-export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): Promise<UsersV2 | null> {
+export async function fetchUsersV2ById(
+  id: any,
+  options?: UsersV2FetchOptions
+): Promise<UsersV2 | null> {
   try {
     // Array of standard table column select fragments
     const selectFields = [
@@ -34,18 +37,18 @@ export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): 
       sql`t.name`,
       sql`t.email`,
       sql`t.image`,
-      sql`t.created_at`
+      sql`t.created_at`,
     ] as any[];
 
     // Push relational aggregates dynamically into the SELECT clause
     if (options?.include) {
-    if (options?.include?.includes('invoices')) {
-      selectFields.push(sql`(
+      if (options?.include?.includes('invoices')) {
+        selectFields.push(sql`(
         SELECT COALESCE(json_agg(json_build_object('id', r.id, 'customer_id', r.customer_id, 'amount', r.amount, 'status', r.status, 'due_date', r.due_date, 'users_v2_id', r.users_v2_id)), '[]'::json)
         FROM invoices r
         WHERE r.users_v2_id = t.id
       ) as invoices`);
-    }
+      }
     }
 
     // Execute exactly one single database roundtrip!
@@ -54,7 +57,7 @@ export async function fetchUsersV2ById(id: any, options?: UsersV2FetchOptions): 
       FROM users_v2 t
       WHERE t.id = ${id}
     `) as unknown as UsersV2[];
-    
+
     return data[0] || null;
   } catch (error) {
     console.error(`Database Error: Failed to fetch users_v2 with key(s): `, { id }, error);

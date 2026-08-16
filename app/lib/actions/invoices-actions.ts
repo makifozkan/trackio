@@ -14,13 +14,12 @@ export type ActionState = {
  * CREATE ACTION
  */
 export async function createInvoicesAction(
-  prevState: ActionState, 
+  prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = { ...Object.fromEntries(formData.entries()) };
 
   // Convert File binary uploads into valid base64 strings securely on the server
-  
 
   // Validate inputs with Zod
   const validatedFields = CreateInvoices.safeParse(rawFields);
@@ -56,13 +55,12 @@ export async function createInvoicesAction(
  */
 export async function updateInvoicesAction(
   id: any,
-  prevState: ActionState, 
+  prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const rawFields = { ...Object.fromEntries(formData.entries()) };
 
   // Convert File binary uploads into base64 strings during modifications
-  
 
   const validatedFields = UpdateInvoices.safeParse(rawFields);
 

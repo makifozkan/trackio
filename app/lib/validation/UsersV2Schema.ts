@@ -3,7 +3,9 @@ import { z } from 'zod';
 export const UsersV2Schema = z.object({
   id: z.string().optional(),
   name: z.string({ required_error: 'name is required.' }),
-  email: z.string({ required_error: 'Please enter your email.' }).email({ message: 'Invalid email address.' }),
+  email: z
+    .string({ required_error: 'Please enter your email.' })
+    .email({ message: 'Invalid email address.' }),
   image: z.string().nullable().optional(),
   created_at: z.string().optional(),
 });
@@ -16,4 +18,3 @@ export type CreateUsersV2Type = z.infer<typeof CreateUsersV2>;
 
 export const UpdateUsersV2 = UsersV2Schema.omit({ id: true });
 export type UpdateUsersV2Type = z.infer<typeof UpdateUsersV2>;
-

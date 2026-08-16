@@ -16,4 +16,3 @@ export type CreateSessionType = z.infer<typeof CreateSession>;
 
 export const UpdateSession = SessionSchema.omit({ id: true });
 export type UpdateSessionType = z.infer<typeof UpdateSession>;
-

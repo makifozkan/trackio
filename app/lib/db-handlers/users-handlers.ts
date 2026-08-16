@@ -34,18 +34,18 @@ export async function fetchUsersById(id: any, options?: UsersFetchOptions): Prom
       sql`t.name`,
       sql`t.email`,
       sql`t.image`,
-      sql`t.created_at`
+      sql`t.created_at`,
     ] as any[];
 
     // Push relational aggregates dynamically into the SELECT clause
     if (options?.include) {
-    if (options?.include?.includes('invoices')) {
-      selectFields.push(sql`(
+      if (options?.include?.includes('invoices')) {
+        selectFields.push(sql`(
         SELECT COALESCE(json_agg(json_build_object('id', r.id, 'customer_id', r.customer_id, 'amount', r.amount, 'status', r.status, 'due_date', r.due_date, 'user_id', r.user_id)), '[]'::json)
         FROM invoices r
         WHERE r.user_id = t.id
       ) as invoices`);
-    }
+      }
     }
 
     // Execute exactly one single database roundtrip!
@@ -54,7 +54,7 @@ export async function fetchUsersById(id: any, options?: UsersFetchOptions): Prom
       FROM users t
       WHERE t.id = ${id}
     `) as unknown as Users[];
-    
+
     return data[0] || null;
   } catch (error) {
     console.error(`Database Error: Failed to fetch users with key(s): `, { id }, error);

@@ -17,4 +17,3 @@ export type CreateInvoicesType = z.infer<typeof CreateInvoices>;
 
 export const UpdateInvoices = InvoicesSchema.omit({ id: true });
 export type UpdateInvoicesType = z.infer<typeof UpdateInvoices>;
-
